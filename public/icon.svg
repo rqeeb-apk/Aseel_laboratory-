@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bg)" stroke="#38bdf8" stroke-width="6" stroke-opacity="0.3"/>
+
+  <!-- Circuit Trace Lines -->
+  <g stroke="#38bdf8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+    <path d="M 90 120 L 160 120 L 210 170" fill="none"/>
+    <circle cx="90" cy="120" r="8" fill="#38bdf8"/>
+    <path d="M 422 120 L 352 120 L 302 170" fill="none"/>
+    <circle cx="422" cy="120" r="8" fill="#38bdf8"/>
+    <path d="M 90 392 L 160 392 L 210 342" fill="none"/>
+    <circle cx="90" cy="392" r="8" fill="#38bdf8"/>
+    <path d="M 422 392 L 352 392 L 302 342" fill="none"/>
+    <circle cx="422" cy="392" r="8" fill="#38bdf8"/>
+  </g>
+
+  <!-- Mechatronics Gear (Behind Chip) -->
+  <g fill="#1e293b" stroke="#38bdf8" stroke-width="4" opacity="0.6">
+    <circle cx="256" cy="256" r="140" fill="#0f172a"/>
+  </g>
+
+  <!-- Central Microchip Body -->
+  <rect x="166" y="166" width="180" height="180" rx="24" fill="#0b1329" stroke="url(#accent)" stroke-width="6"/>
+
+  <!-- IC Pins -->
+  <g fill="#38bdf8">
+    <!-- Top Pins -->
+    <rect x="196" y="146" width="12" height="20" rx="3"/>
+    <rect x="226" y="146" width="12" height="20" rx="3"/>
+    <rect x="256" y="146" width="12" height="20" rx="3"/>
+    <rect x="286" y="146" width="12" height="20" rx="3"/>
+    <rect x="316" y="146" width="12" height="20" rx="3"/>
+    <!-- Bottom Pins -->
+    <rect x="196" y="346" width="12" height="20" rx="3"/>
+    <rect x="226" y="346" width="12" height="20" rx="3"/>
+    <rect x="256" y="346" width="12" height="20" rx="3"/>
+    <rect x="286" y="346" width="12" height="20" rx="3"/>
+    <rect x="316" y="346" width="12" height="20" rx="3"/>
+    <!-- Left Pins -->
+    <rect x="146" y="196" width="20" height="12" rx="3"/>
+    <rect x="146" y="226" width="20" height="12" rx="3"/>
+    <rect x="146" y="256" width="20" height="12" rx="3"/>
+    <rect x="146" y="286" width="20" height="12" rx="3"/>
+    <rect x="146" y="316" width="20" height="12" rx="3"/>
+    <!-- Right Pins -->
+    <rect x="346" y="196" width="20" height="12" rx="3"/>
+    <rect x="346" y="226" width="20" height="12" rx="3"/>
+    <rect x="346" y="256" width="20" height="12" rx="3"/>
+    <rect x="346" y="286" width="20" height="12" rx="3"/>
+    <rect x="346" y="316" width="20" height="12" rx="3"/>
+  </g>
+
+  <!-- Glowing Lightning Bolt / Energy Spark -->
+  <path d="M 276 196 L 226 266 L 256 266 L 236 316 L 296 246 L 266 246 Z" fill="url(#gold)" filter="drop-shadow(0 0 12px rgba(251, 191, 36, 0.6))"/>
+
+  <!-- Brand Typography -->
+  <text x="256" y="440" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" fill="#f8fafc" text-anchor="middle" letter-spacing="1">مختبر الميكاترونكس</text>
+  <text x="256" y="468" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#38bdf8" text-anchor="middle" letter-spacing="3">YEMEN LAB</text>
+</svg>

@@ -84,29 +84,42 @@ export const ComponentDrawer: React.FC<ComponentDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <aside
-      className={`fixed lg:absolute top-0 right-0 bottom-0 z-30 w-full sm:w-96 bg-slate-900/95 backdrop-blur-xl border-l border-slate-800 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out`}
-      dir="rtl"
-    >
-      {/* Drawer Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-slate-100">مكتبة المكونات الإلكترونية</h2>
-            <p className="text-[11px] text-slate-400">Circuit Wizard Components Library</p>
-          </div>
+    <>
+      {/* Mobile Backdrop */}
+      <div
+        className="fixed inset-0 z-35 bg-black/60 backdrop-blur-xs sm:hidden"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <aside
+        className="fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:h-[80vh] max-sm:rounded-t-3xl max-sm:border-t max-sm:border-sky-500/30 sm:top-0 sm:right-0 sm:bottom-0 sm:w-96 z-40 bg-slate-900/95 backdrop-blur-xl sm:border-l border-slate-800 flex flex-col shadow-2xl shadow-black/90 transition-all duration-300 ease-in-out"
+        dir="rtl"
+      >
+        {/* Mobile Drag Handle */}
+        <div className="w-full pt-2.5 pb-1 flex justify-center sm:hidden" onClick={onClose}>
+          <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
         </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          title="إغلاق المكتبة"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-5 py-3 sm:py-4 border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-100">مكتبة المكونات الإلكترونية</h2>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Circuit Wizard Components Library</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            title="إغلاق المكتبة"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
       {/* Search Input */}
       <div className="p-3 border-b border-slate-800/80 shrink-0">
@@ -206,5 +219,6 @@ export const ComponentDrawer: React.FC<ComponentDrawerProps> = ({
         </p>
       </div>
     </aside>
-  );
+  </>
+);
 };

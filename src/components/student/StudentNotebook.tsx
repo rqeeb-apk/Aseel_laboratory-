@@ -36,6 +36,9 @@ interface StudentNotebookProps {
   currentElements: CircuitElement[];
   currentWires: WireConnection[];
   onSaveCurrentCircuit: (name: string, description: string) => void;
+  userPhone?: string;
+  onOpenChangePassword?: () => void;
+  onLogout?: () => void;
 }
 
 export const StudentNotebook: React.FC<StudentNotebookProps> = ({
@@ -50,6 +53,9 @@ export const StudentNotebook: React.FC<StudentNotebookProps> = ({
   currentElements,
   currentWires,
   onSaveCurrentCircuit,
+  userPhone,
+  onOpenChangePassword,
+  onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'circuits' | 'tests' | 'report'>('profile');
   const [saveName, setSaveName] = useState('');
@@ -254,6 +260,48 @@ export const StudentNotebook: React.FC<StudentNotebookProps> = ({
                   <div className="text-xl font-bold text-sky-400 font-mono mt-0.5">
                     {savedCircuits.length}
                   </div>
+                </div>
+              </div>
+
+              {/* Account Security & Subscription Card */}
+              <div className="mt-4 p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold text-white">حساب الطالب والاشتراك في الأكاديمية</h4>
+                    {userPhone && (
+                      <p className="text-[11px] font-mono text-cyan-400 mt-0.5">رقم الهاتف: {userPhone}</p>
+                    )}
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    اشتراك معتمد وفعال
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1 border-t border-slate-800/80">
+                  {onOpenChangePassword && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenChangePassword();
+                      }}
+                      className="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-all text-center"
+                    >
+                      تغيير كلمة المرور
+                    </button>
+                  )}
+                  {onLogout && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onLogout();
+                      }}
+                      className="py-2 px-4 bg-red-950/60 hover:bg-red-900/60 text-red-300 text-xs font-semibold rounded-xl border border-red-800/60 transition-all text-center"
+                    >
+                      تسجيل الخروج
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -32,6 +32,12 @@ import { EngineeringCalculators } from './components/calculators/EngineeringCalc
 import { EditElementModal } from './components/canvas/EditElementModal';
 import { WorkbenchModal } from './components/canvas/WorkbenchModal';
 import { WorkbenchBackgroundId } from './data/workbenchBackgrounds';
+import { StudentUser, OwnerUser } from './types/auth';
+import { authService } from './services/authService';
+import { AuthScreen } from './components/auth/AuthScreen';
+import { PendingStatusView } from './components/auth/PendingStatusView';
+import { OwnerDashboardModal } from './components/auth/OwnerDashboardModal';
+import { ChangePasswordModal } from './components/auth/ChangePasswordModal';
 
 const STORAGE_KEYS = {
   PROFILE: 'ym_student_profile',
@@ -111,6 +117,71 @@ const INITIAL_WIRES: WireConnection[] = [
 ];
 
 export default function App() {
+  // Authentication & Subscription State
+  const [authLoading, setAuthLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<StudentUser | null>(null);
+  const [currentOwner, setCurrentOwner] = useState<OwnerUser | null>(null);
+  const [isOwnerDashboardOpen, setIsOwnerDashboardOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+  // Check existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const token = authService.getToken();
+      if (!token) {
+        setAuthLoading(false);
+        return;
+      }
+      try {
+        const res = await authService.getMe();
+        if (res.role === 'owner') {
+          setCurrentOwner(res.user as OwnerUser);
+        } else if (res.role === 'student') {
+          const user = res.user as StudentUser;
+          setCurrentUser(user);
+          if (user.fullName) {
+            setStudentProfile(prev => ({ ...prev, name: user.fullName }));
+          }
+        }
+      } catch {
+        authService.clearToken();
+        setCurrentUser(null);
+        setCurrentOwner(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+    checkSession();
+  }, []);
+
+  const handleStudentSuccess = (user: StudentUser) => {
+    setCurrentUser(user);
+    if (user.fullName) {
+      setStudentProfile(prev => ({ ...prev, name: user.fullName }));
+    }
+  };
+
+  const handleOwnerSuccess = (owner: OwnerUser) => {
+    setCurrentOwner(owner);
+    setIsOwnerDashboardOpen(true);
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
+    setCurrentUser(null);
+    setCurrentOwner(null);
+    setIsOwnerDashboardOpen(false);
+  };
+
+  const handleRefreshUserStatus = async () => {
+    try {
+      const res = await authService.getMe();
+      if (res.role === 'student') {
+        setCurrentUser(res.user as StudentUser);
+      }
+    } catch {}
+  };
+
   // Circuit Canvas State
   const [elements, setElements] = useState<CircuitElement[]>(() => {
     try {
@@ -545,6 +616,46 @@ export default function App() {
     }));
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-center select-none" dir="rtl">
+        <div className="w-14 h-14 rounded-2xl bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center mb-4">
+          <div className="w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <h2 className="text-lg font-bold text-white">مختبر الميكاترونكس اليمني</h2>
+        <p className="text-xs text-slate-400 mt-1">جارٍ التحقق من بيانات الدخول والجلسة...</p>
+      </div>
+    );
+  }
+
+  // Not logged in -> Show Splash & Auth Screen
+  if (!currentUser && !currentOwner) {
+    return (
+      <AuthScreen
+        onStudentSuccess={handleStudentSuccess}
+        onOwnerSuccess={handleOwnerSuccess}
+      />
+    );
+  }
+
+  // Logged in student but subscription is pending or suspended -> Block lab access and show status
+  if (currentUser && currentUser.subscriptionStatus !== 'active') {
+    return (
+      <>
+        <PendingStatusView
+          user={currentUser}
+          onRefreshStatus={handleRefreshUserStatus}
+          onLogout={handleLogout}
+          onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+        />
+        <ChangePasswordModal
+          isOpen={isChangePasswordOpen}
+          onClose={() => setIsChangePasswordOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="relative w-screen h-screen flex flex-col bg-slate-950 overflow-hidden font-sans" dir="rtl">
       {/* Top Application Toolbar */}
@@ -563,6 +674,10 @@ export default function App() {
         onOpenCalculators={() => setIsCalculatorsOpen(true)}
         onOpenStudent={() => setIsStudentOpen(true)}
         onOpenWorkbenchModal={() => setIsWorkbenchModalOpen(true)}
+        currentUser={currentUser}
+        currentOwner={currentOwner}
+        onOpenOwnerDashboard={() => setIsOwnerDashboardOpen(true)}
+        onLogout={handleLogout}
         simResult={simResult}
       />
 
@@ -648,6 +763,9 @@ export default function App() {
         currentElements={elements}
         currentWires={wires}
         onSaveCurrentCircuit={handleSaveCurrentCircuit}
+        userPhone={currentUser?.phone}
+        onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Engineering Calculators Modal */}
@@ -677,6 +795,22 @@ export default function App() {
         onChangeOpacity={setWorkbenchOpacity}
         showGrid={showGrid}
         onToggleGrid={() => setShowGrid(prev => !prev)}
+      />
+
+      {/* Owner Dashboard Control Modal */}
+      {currentOwner && (
+        <OwnerDashboardModal
+          owner={currentOwner}
+          isOpen={isOwnerDashboardOpen}
+          onClose={() => setIsOwnerDashboardOpen(false)}
+          onLogout={handleLogout}
+        />
+      )}
+
+      {/* Student Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
       />
     </div>
   );

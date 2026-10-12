@@ -67,7 +67,7 @@ export const DigitalMultimeter: React.FC<DigitalMultimeterProps> = ({
 
   return (
     <div
-      className="fixed bottom-20 left-4 sm:left-8 z-40 w-80 sm:w-88 bg-amber-500 rounded-3xl p-3 shadow-2xl shadow-black/80 border-4 border-amber-600 select-none"
+      className="fixed bottom-20 left-2 right-2 sm:right-auto sm:left-8 z-40 max-w-[calc(100vw-1rem)] sm:w-88 bg-amber-500 rounded-3xl p-2.5 sm:p-3 shadow-2xl shadow-black/80 border-4 border-amber-600 select-none max-h-[85vh] overflow-y-auto"
       dir="rtl"
     >
       {/* Multimeter Body Inner Frame */}

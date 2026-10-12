@@ -145,11 +145,11 @@ export const EngineeringCalculators: React.FC<EngineeringCalculatorsProps> = ({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-900/40">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 bg-slate-900/40">
           {/* OHM'S LAW */}
           {activeCalc === 'ohm' && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1">الجهد المطبق (V بالفولت):</label>
                   <input
@@ -170,18 +170,18 @@ export const EngineeringCalculators: React.FC<EngineeringCalculatorsProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                <div className="p-3.5 sm:p-4 bg-slate-950 border border-slate-800 rounded-2xl">
                   <span className="text-xs text-slate-400">التيار الكهربائي المحسوب (I):</span>
-                  <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                  <div className="text-xl sm:text-2xl font-bold font-mono text-emerald-400 mt-1">
                     {(ohmI * 1000).toFixed(2)} mA
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5 font-mono">{ohmI.toFixed(5)} A</div>
                 </div>
 
-                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                <div className="p-3.5 sm:p-4 bg-slate-950 border border-slate-800 rounded-2xl">
                   <span className="text-xs text-slate-400">القدرة الكهربائية المبددة (P):</span>
-                  <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+                  <div className="text-xl sm:text-2xl font-bold font-mono text-amber-400 mt-1">
                     {(ohmP * 1000).toFixed(2)} mW
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5 font-mono">{ohmP.toFixed(4)} W</div>

@@ -147,8 +147,38 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     }
   };
 
+  // Multi-touch active pointers tracking for pinch-to-zoom & two-finger pan
+  const pointersMapRef = useRef<Map<number, { clientX: number; clientY: number }>>(new Map());
+  const pinchDataRef = useRef<{
+    initialDist: number;
+    initialZoom: number;
+    initialPan: { x: number; y: number };
+    midpoint: { x: number; y: number };
+  } | null>(null);
+
   // Canvas pointer down (Start pan or start element drag)
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Record pointer
+    pointersMapRef.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
+    // Multi-touch pinch detection (2 fingers)
+    if (pointersMapRef.current.size === 2) {
+      const pts = Array.from(pointersMapRef.current.values());
+      const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      const mid = {
+        x: (pts[0].clientX + pts[1].clientX) / 2,
+        y: (pts[0].clientY + pts[1].clientY) / 2,
+      };
+      pinchDataRef.current = {
+        initialDist: Math.max(dist, 10),
+        initialZoom: zoom,
+        initialPan: { ...pan },
+        midpoint: mid,
+      };
+      dragRef.current.isDragging = false;
+      return;
+    }
+
     // If clicked on empty space, deselect
     if (e.target === svgRef.current || (e.target as Element).tagName === 'rect') {
       onSelectElement(null);
@@ -172,6 +202,10 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   // Element pointer down
   const handleElementPointerDown = (elementId: string, e: React.PointerEvent) => {
     e.stopPropagation();
+    pointersMapRef.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+
+    if (pointersMapRef.current.size >= 2) return;
+
     onSelectElement(elementId);
     onSelectWire(null);
 
@@ -191,6 +225,33 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
   // Global pointer move
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (pointersMapRef.current.has(e.pointerId)) {
+      pointersMapRef.current.set(e.pointerId, { clientX: e.clientX, clientY: e.clientY });
+    }
+
+    // Handle 2-Finger Pinch Zoom and Pan
+    if (pointersMapRef.current.size === 2 && pinchDataRef.current) {
+      const pts = Array.from(pointersMapRef.current.values());
+      const currentDist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+      const currentMid = {
+        x: (pts[0].clientX + pts[1].clientX) / 2,
+        y: (pts[0].clientY + pts[1].clientY) / 2,
+      };
+
+      const scaleFactor = currentDist / pinchDataRef.current.initialDist;
+      const targetZoom = Math.min(2.8, Math.max(0.4, pinchDataRef.current.initialZoom * scaleFactor));
+
+      const dx = currentMid.x - pinchDataRef.current.midpoint.x;
+      const dy = currentMid.y - pinchDataRef.current.midpoint.y;
+
+      setZoom(targetZoom);
+      setPan({
+        x: pinchDataRef.current.initialPan.x + dx,
+        y: pinchDataRef.current.initialPan.y + dy,
+      });
+      return;
+    }
+
     if (activePin) {
       const world = screenToWorld(e.clientX, e.clientY);
       setDrawingWirePos({ x: snapToGrid(world.x), y: snapToGrid(world.y) });
@@ -213,17 +274,54 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     }
   };
 
-  // Global pointer up
-  const handlePointerUp = () => {
+  // Global pointer up & cancel
+  const handlePointerUp = (e?: React.PointerEvent) => {
+    if (e) {
+      pointersMapRef.current.delete(e.pointerId);
+    } else {
+      pointersMapRef.current.clear();
+    }
+    if (pointersMapRef.current.size < 2) {
+      pinchDataRef.current = null;
+    }
     dragRef.current.isDragging = false;
   };
 
   // Zoom handlers
-  const handleZoomIn = () => setZoom(prev => Math.min(2.5, prev + 0.15));
+  const handleZoomIn = () => setZoom(prev => Math.min(2.8, prev + 0.15));
   const handleZoomOut = () => setZoom(prev => Math.max(0.4, prev - 0.15));
   const handleResetView = () => {
     setZoom(1.0);
     setPan({ x: 60, y: 60 });
+  };
+
+  // Fit & center all elements in viewport
+  const handleFitCircuit = () => {
+    if (elements.length === 0) {
+      handleResetView();
+      return;
+    }
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    elements.forEach(el => {
+      minX = Math.min(minX, el.x - 60);
+      maxX = Math.max(maxX, el.x + 60);
+      minY = Math.min(minY, el.y - 60);
+      maxY = Math.max(maxY, el.y + 60);
+    });
+    const cWidth = containerRef.current?.clientWidth || window.innerWidth;
+    const cHeight = containerRef.current?.clientHeight || window.innerHeight;
+    const boxW = Math.max(maxX - minX, 150);
+    const boxH = Math.max(maxY - minY, 150);
+    const scaleX = (cWidth * 0.8) / boxW;
+    const scaleY = (cHeight * 0.75) / boxH;
+    const newZoom = Math.max(0.5, Math.min(1.5, Math.min(scaleX, scaleY)));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    setZoom(newZoom);
+    setPan({
+      x: cWidth / 2 - centerX * newZoom,
+      y: cHeight / 2 - centerY * newZoom,
+    });
   };
 
   const selectedElement = elements.find(e => e.id === selectedElementId);
@@ -361,11 +459,11 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       {/* Floating Quick Action Bar when a Component is Selected */}
       {selectedElement && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 p-1.5 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-xl shadow-black/40">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 p-1 sm:p-1.5 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-xl shadow-black/60 max-w-[96vw] overflow-x-auto">
           <button
             onClick={() => onRotateElement(selectedElement.id)}
             title="تدوير 90 درجة"
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors min-h-[38px] active:scale-95"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors min-h-[38px] active:scale-95 shrink-0"
           >
             <RotateCw className="w-3.5 h-3.5 text-sky-400" />
             <span>تدوير</span>
@@ -374,7 +472,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           <button
             onClick={() => onEditElement(selectedElement)}
             title="تعديل القيمة والخصائص"
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors min-h-[38px] active:scale-95"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors min-h-[38px] active:scale-95 shrink-0"
           >
             <Settings className="w-3.5 h-3.5 text-amber-400" />
             <span>تعديل</span>
@@ -383,7 +481,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           <button
             onClick={() => onDuplicateElement(selectedElement.id)}
             title="تكرار العنصر"
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors min-h-[38px] active:scale-95"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors min-h-[38px] active:scale-95 shrink-0"
           >
             <Copy className="w-3.5 h-3.5 text-emerald-400" />
             <span>تكرار</span>
@@ -392,7 +490,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           <button
             onClick={() => onDeleteElement(selectedElement.id)}
             title="حذف العنصر"
-            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-rose-300 hover:text-rose-100 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/40 rounded-lg transition-colors min-h-[38px] active:scale-95"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/40 rounded-xl transition-colors min-h-[38px] active:scale-95 shrink-0"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-400" />
             <span>حذف</span>
@@ -402,11 +500,11 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       {/* Floating Wire Action Bar when a Wire is Selected */}
       {selectedWireId && !selectedElement && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2 bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-xl shadow-xl">
-          <span className="text-xs text-slate-300">سلك محدد</span>
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3.5 py-1.5 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-2xl shadow-xl max-w-[96vw]">
+          <span className="text-xs text-slate-300 font-medium">سلك محدد</span>
           <button
             onClick={() => onDeleteWire(selectedWireId)}
-            className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-rose-300 bg-rose-950/60 hover:bg-rose-900 border border-rose-800/40 rounded-lg transition-colors min-h-[36px]"
+            className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-rose-300 bg-rose-950/70 hover:bg-rose-900 border border-rose-800/40 rounded-xl transition-colors min-h-[36px]"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-400" />
             <span>حذف السلك</span>
@@ -416,9 +514,9 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
 
       {/* Wiring In Progress Notification */}
       {activePin && (
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-2 bg-sky-950/90 border border-sky-500/50 rounded-xl shadow-lg backdrop-blur-sm animate-pulse">
-          <div className="w-2.5 h-2.5 rounded-full bg-sky-400" />
-          <span className="text-xs font-medium text-sky-200">
+        <div className="absolute top-3 right-3 sm:right-6 z-20 flex items-center gap-2 px-3 py-2 bg-sky-950/95 border border-sky-500/60 rounded-2xl shadow-xl backdrop-blur-md animate-pulse max-w-[90vw]">
+          <div className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0" />
+          <span className="text-xs font-semibold text-sky-200 truncate">
             انقر على طرف المكون الثاني لإتمام التوصيل بالسلك
           </span>
           <button
@@ -426,40 +524,40 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
               setActivePin(null);
               setDrawingWirePos(null);
             }}
-            className="px-2 py-0.5 text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded"
+            className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg shrink-0 font-bold"
           >
             إلغاء
           </button>
         </div>
       )}
 
-      {/* Floating Zoom & Canvas Controls (Ergonomic Corner) */}
-      <div className="absolute bottom-6 left-6 z-20 flex flex-col items-center gap-1.5 p-1 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl shadow-lg">
+      {/* Floating Zoom & Canvas Controls (Safely positioned above mobile bottom bar) */}
+      <div className="absolute bottom-20 md:bottom-6 left-3 sm:left-6 z-20 flex flex-col items-center gap-1 p-1 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl shadow-xl shadow-black/50">
         <button
           onClick={handleZoomIn}
           title="تكبير"
-          className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={handleResetView}
           title="إعادة ضبط الرؤية (100%)"
-          className="px-1.5 py-1 text-[11px] font-mono text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-md transition-colors"
+          className="px-1.5 py-1 text-[10px] sm:text-[11px] font-mono text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors"
         >
           {Math.round(zoom * 100)}%
         </button>
         <button
           onClick={handleZoomOut}
           title="تصغير"
-          className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
-          onClick={handleResetView}
-          title="توسيط الدائرة"
-          className="w-9 h-9 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          onClick={handleFitCircuit}
+          title="ملاءمة وتوسيط الدائرة كاملة في الشاشة"
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 rounded-xl transition-colors"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
@@ -468,7 +566,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           <button
             onClick={onOpenWorkbenchSettings}
             title="تخصيص طاولة العمل الفيزيائية"
-            className="w-9 h-9 flex items-center justify-center text-amber-400 hover:text-amber-300 hover:bg-slate-800 rounded-lg transition-colors border-t border-slate-800/80"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-amber-400 hover:text-amber-300 hover:bg-slate-800 rounded-xl transition-colors border-t border-slate-800/80"
           >
             <Layers className="w-4 h-4" />
           </button>
