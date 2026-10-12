@@ -73,25 +73,18 @@ export const authService = {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // If legitimate API error (e.g. invalid password, wrong phone)
+        // Legitimate API validation error from backend (400, 401, 409, etc.)
         throw new Error(data.error || 'حدث خطأ أثناء معالجة الطلب');
       }
 
       return data;
     } catch (err: any) {
-      // If it is a known business validation error from the API, rethrow it
-      if (
-        err.message &&
-        (err.message.includes('بيانات اعتماد') ||
-          err.message.includes('كلمة المرور') ||
-          err.message.includes('رقم الهاتف') ||
-          err.message.includes('غير متطابقتين') ||
-          err.message.includes('مسجل بالفعل'))
-      ) {
+      // If this was an explicit API error with message, rethrow it directly so the user sees it in the form
+      if (err.message && !err.message.includes('fetch') && !err.message.includes('network') && !err.message.includes('Failed to')) {
         throw err;
       }
 
-      // Otherwise network failure / server unavailable (e.g. Vercel static deployment)
+      // Otherwise real network failure / offline / Vercel static deployment without Node backend
       return { __fallback: true, error: err.message };
     }
   },

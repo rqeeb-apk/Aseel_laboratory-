@@ -131,6 +131,19 @@ if (preapprovedCount?.count === 0) {
   }
 }
 
+// Seed demo active student if not present
+const existingDemoUser = db.prepare('SELECT id FROM users WHERE phone = ?').get('777000111');
+if (!existingDemoUser) {
+  const { salt: demoSalt, hash: demoHash } = hashPassword('password123');
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  db.prepare(`
+    INSERT INTO users (id, phone, full_name, password_salt, password_hash, is_academy_member, subscription_status, subscription_expires_at, created_at)
+    VALUES (?, ?, ?, ?, ?, 1, 'active', ?, ?)
+  `).run('demo_std_1', '777000111', 'م. علي صالح (طالب معتمد)', demoSalt, demoHash, oneYearFromNow.toISOString(), new Date().toISOString());
+  console.log('✅ تم تهيئة حساب طالب معتمد تجريبي (هاتف: 777000111 | كلمة المرور: password123)');
+}
+
 // Session middleware helpers
 function getSessionUser(req: express.Request): { userId: string; role: string } | null {
   const authHeader = req.headers.authorization;
@@ -443,7 +456,8 @@ app.post('/api/auth/change-password', requireStudentAuth, (req, res) => {
 // Owner Login
 app.post('/api/owner/login', (req, res) => {
   try {
-    const { usernameOrPhone, password } = req.body;
+    const usernameOrPhone = req.body.usernameOrPhone || req.body.username;
+    const password = req.body.password;
     if (!usernameOrPhone || !password) {
       res.status(400).json({ error: 'يُرجى إدخال اسم المستخدم وكلمة المرور للمالك' });
       return;

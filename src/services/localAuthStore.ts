@@ -57,6 +57,7 @@ export const localAuthStore = {
           },
         ];
         localStorage.setItem(KEYS.STUDENTS, JSON.stringify(initialStudents));
+        localStorage.setItem('ym_std_pwd_std_demo_1', 'password123');
       }
     } catch (e) {
       console.warn('localStorage access failed in localAuthStore init', e);

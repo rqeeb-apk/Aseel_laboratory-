@@ -98,7 +98,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
         <div className="flex sm:hidden items-center gap-1.5">
           <ProjectLogo variant="emblem" size="xs" />
-          <span className="text-xs font-black text-white truncate max-w-[125px]">
+          <span className="text-xs font-black text-white truncate max-w-[120px] hidden xs:inline">
             الميكاترونكس
           </span>
         </div>
@@ -109,7 +109,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         {/* Run / Pause Button */}
         <button
           onClick={onToggleSim}
-          className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-md min-h-[36px] sm:min-h-[40px] active:scale-95 ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-md min-h-[36px] sm:min-h-[40px] active:scale-95 shrink-0 ${
             isSimRunning
               ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
               : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20'
@@ -139,7 +139,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </button>
 
         {/* Schematic vs Realistic View Toggle (Mandatory Requirement) */}
-        <div className="flex items-center p-0.5 bg-slate-950 border border-slate-800 rounded-xl shrink-0">
+        <div className="hidden xs:flex items-center p-0.5 bg-slate-950 border border-slate-800 rounded-xl shrink-0">
           <button
             onClick={() => onChangeRenderStyle('schematic')}
             className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-lg transition-all ${
@@ -229,10 +229,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex items-center gap-1.5 sm:gap-2">
         <button
           onClick={onOpenLibrary}
-          className="flex items-center gap-1 px-3 py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-xl text-xs font-bold transition-all min-h-[40px]"
+          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-xl text-xs font-bold transition-all min-h-[36px] sm:min-h-[40px] shrink-0"
+          title="مكتبة المكونات الإلكترونية"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>المكونات</span>
+          <span className="hidden xs:inline">المكونات</span>
         </button>
 
         <button

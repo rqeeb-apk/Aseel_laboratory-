@@ -26,6 +26,7 @@ interface PendingStatusViewProps {
   onRefreshStatus: () => Promise<void>;
   onLogout: () => void;
   onOpenChangePassword: () => void;
+  onEnterDemoMode?: () => void;
 }
 
 export function PendingStatusView({
@@ -33,6 +34,7 @@ export function PendingStatusView({
   onRefreshStatus,
   onLogout,
   onOpenChangePassword,
+  onEnterDemoMode,
 }: PendingStatusViewProps) {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
@@ -178,27 +180,44 @@ export function PendingStatusView({
             )}
           </div>
 
-          {/* Action 1: WhatsApp Button */}
-          <button
-            onClick={handleOpenWhatsApp}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all mb-3 text-sm"
+          {/* Action 1: WhatsApp Button (Direct Link to bypass iframe popup blocking) */}
+          <a
+            href={`https://wa.me/967785502919?text=${encodeURIComponent(
+              user.subscriptionStatus === 'pending_verification'
+                ? `السلام عليكم، أنا الطالب: ${user.fullName}، رقم هاتفي: ${user.phone}.\nأرجو التحقق من اشتراكي في أكاديمية الميكاترونكس اليمنية وتفعيل حسابي في مختبر الميكاترونكس اليمني الافتراضي.`
+                : `السلام عليكم، أنا الطالب: ${user.fullName}، رقم هاتفي: ${user.phone}.\nأود طلب الاشتراك في منصة أكاديمية الميكاترونكس اليمنية لتفعيل حسابي في مختبر الميكاترونكس اليمني الافتراضي.`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all mb-3 text-sm active:scale-98"
           >
             <MessageCircle className="w-5 h-5" />
             <span>{statusInfo.callToAction}</span>
             <ExternalLink className="w-4 h-4 opacity-75" />
-          </button>
+          </a>
+
+          {/* Action 2: Enter Lab in Demo / Exploration Mode */}
+          {onEnterDemoMode && (
+            <button
+              onClick={onEnterDemoMode}
+              className="w-full py-3 px-4 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold rounded-xl shadow-md shadow-sky-600/20 flex items-center justify-center gap-2 transition-all mb-3 text-xs sm:text-sm active:scale-98"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>دخول تجريبي فوري للمختبر (وضع الاستكشاف)</span>
+            </button>
+          )}
 
           {/* Note regarding WhatsApp manual send as required */}
           <p className="text-[11px] text-slate-400 mb-4">
             * تنبيه: سيتم فتح تطبيق واتساب مع الرقم <span className="font-mono text-emerald-400">785502919</span>، ويجب عليك الضغط على زر "إرسال" داخل واتساب لتأكيد طلبك.
           </p>
 
-          {/* Action 2: Refresh Status */}
+          {/* Action 3: Refresh Status & Password */}
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[42px]"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-cyan-400' : ''}`} />
               <span>{refreshing ? 'جارٍ الفحص...' : 'فحص هل تم التفعيل'}</span>
@@ -206,7 +225,7 @@ export function PendingStatusView({
 
             <button
               onClick={onOpenChangePassword}
-              className="py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl border border-slate-800 flex items-center justify-center gap-1.5 transition-all"
+              className="py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl border border-slate-800 flex items-center justify-center gap-1.5 transition-all min-h-[42px]"
             >
               <KeyRound className="w-3.5 h-3.5 text-slate-400" />
               <span>تغيير كلمة المرور</span>

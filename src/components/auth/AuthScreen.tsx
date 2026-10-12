@@ -48,7 +48,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
   const [regPhone, setRegPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
-  const [isAcademyMember, setIsAcademyMember] = useState<boolean | null>(null);
+  const [isAcademyMember, setIsAcademyMember] = useState<boolean>(true);
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
 
@@ -92,48 +92,36 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
     e.preventDefault();
     setRegError(null);
 
-    if (!regFullName.trim() || regFullName.trim().length < 3) {
-      setRegError('يُرجى إدخال الاسم الكامل (ثلاثي على الأقل)');
+    const cleanName = regFullName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      setRegError('يُرجى إدخال الاسم الكامل للطالب أو المهندس');
       return;
     }
-    if (!regPhone.trim() || regPhone.replace(/\D/g, '').length < 8) {
-      setRegError('يُرجى إدخال رقم هاتف يمني صحيح (مثال: 785502919)');
+    const cleanDigits = regPhone.replace(/\D/g, '');
+    if (!cleanDigits || cleanDigits.length < 7) {
+      setRegError('يُرجى إدخال رقم هاتف صحيح (مثال: 785502919)');
       return;
     }
     if (!regPassword || regPassword.length < 6) {
-      setRegError('يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل');
+      setRegError('يجب أن تتكون كلمة المرور من 6 خانات على الأقل');
       return;
     }
     if (regPassword !== regConfirmPassword) {
       setRegError('كلمة المرور وتأكيدها غير متطابقين');
       return;
     }
-    if (isAcademyMember === null) {
-      setRegError('يُرجى الإجابة على سؤال: هل أنت مشترك في منصة أكاديمية الميكاترونكس اليمنية؟');
-      return;
-    }
 
     setRegLoading(true);
     try {
       const res = await authService.register({
-        fullName: regFullName,
-        phone: regPhone,
+        fullName: cleanName,
+        phone: regPhone.trim(),
         password: regPassword,
         confirmPassword: regConfirmPassword,
         isAcademyMember,
       });
 
-      // If user selected not a member, provide the WhatsApp message pre-fill helper
-      if (!isAcademyMember) {
-        // Compose WhatsApp url for registration
-        const phoneFormatted = regPhone.trim();
-        const msg = encodeURIComponent(
-          `السلام عليكم، أنا الطالب: ${regFullName.trim()}، رقم الهاتف: ${phoneFormatted}.\nأود الاشتراك في منصة أكاديمية الميكاترونكس اليمنية لتفعيل حسابي في المختبر الافتراضي.`
-        );
-        const waUrl = `https://wa.me/967785502919?text=${msg}`;
-        window.open(waUrl, '_blank');
-      }
-
+      // Pass user to success handler directly (PendingStatusView will handle WhatsApp smoothly)
       onStudentSuccess(res.user);
     } catch (err: any) {
       setRegError(err.message || 'فشل إنشاء الحساب، يُرجى المحاولة مرة أخرى');
@@ -163,53 +151,68 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
     }
   };
 
+  const handleQuickDemoLogin = async () => {
+    setLoginPhone('777000111');
+    setLoginPassword('password123');
+    setLoginLoading(true);
+    setLoginError(null);
+    try {
+      const res = await authService.login('777000111', 'password123');
+      onStudentSuccess(res.user);
+    } catch (err: any) {
+      setLoginError(err.message || 'تعذر تسجيل الدخول بالحساب التجريبي');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   return (
     <div
-      className="min-h-screen min-h-[100dvh] w-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between p-3 sm:p-6 md:p-8 relative overflow-y-auto overflow-x-hidden pb-24 sm:pb-12 overscroll-contain"
+      className="w-full min-h-screen min-h-[100dvh] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between overflow-x-hidden relative"
       dir="rtl"
     >
-      {/* Decorative tech background glows */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Decorative tech background glows - fixed & non-blocking */}
+      <div className="fixed top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
+      <div className="fixed bottom-10 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
-      {/* Top Bar with Discreet Owner Icon */}
-      <header className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800/80">
-        <ProjectLogo variant="compact" size="xs" className="sm:hidden" />
-        <ProjectLogo variant="compact" size="sm" className="hidden sm:flex" />
+      {/* Main Scrollable Box with ample bottom clearance for Android keyboard */}
+      <main className="relative z-10 w-full max-w-md mx-auto flex-1 flex flex-col justify-start px-3 py-4 sm:px-6 sm:py-6 pb-36 sm:pb-20">
+        {/* Top Header */}
+        <header className="w-full flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
+          <ProjectLogo variant="compact" size="xs" className="sm:hidden" />
+          <ProjectLogo variant="compact" size="sm" className="hidden sm:flex" />
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <PWAInstallButton compact />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <PWAInstallButton compact />
 
-          {/* Discreet Owner Entry Button */}
-          <button
-            onClick={() => {
-              setOwnerError(null);
-              setIsOwnerModalOpen(true);
-            }}
-            title="دخول إدارة المختبر والمالك"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-amber-400 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 transition-all shadow-sm active:scale-95"
-          >
-            <Shield className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden xs:inline">بوابة الإدارة</span>
-            <span className="xs:hidden">الإدارة</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Main Content Box - Natural flex-1 expansion so scrolling is never clipped */}
-      <main className="relative z-10 w-full max-w-md mx-auto flex-1 flex flex-col justify-center py-2 sm:py-6 px-0">
-        {/* Official Branding & Logo Showcase */}
-        <div className="mb-3 sm:mb-6">
-          <div className="sm:hidden">
-            <ProjectLogo variant="full" size="md" showSlogan={false} />
+            {/* Discreet Owner Entry Button */}
+            <button
+              onClick={() => {
+                setOwnerError(null);
+                setIsOwnerModalOpen(true);
+              }}
+              title="دخول إدارة المختبر والمالك"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-amber-400 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 transition-all shadow-sm active:scale-95"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-500" />
+              <span className="hidden xs:inline">بوابة الإدارة</span>
+              <span className="xs:hidden">الإدارة</span>
+            </button>
           </div>
-          <div className="hidden sm:block">
-            <ProjectLogo variant="full" size="xl" showSlogan />
-          </div>
+        </header>
+
+        {/* Clean, Non-blocking Title Banner */}
+        <div className="text-center mb-3">
+          <h2 className="text-base sm:text-lg font-black text-white">
+            {activeTab === 'register' ? 'إنشاء حساب طالب جديد' : 'تسجيل الدخول للمختبر'}
+          </h2>
+          <p className="text-xs text-sky-400/90 font-medium mt-0.5">
+            مختبر الميكاترونكس اليمني الافتراضي
+          </p>
         </div>
 
         {/* Auth Form Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-2xl backdrop-blur-md">
           {/* Segmented Tab Switcher */}
           <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800/80 rounded-xl mb-4 sm:mb-5">
             <button
@@ -252,7 +255,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 </div>
               )}
 
-              <div className="scroll-mt-8">
+              <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   رقم الهاتف (اليمن)
                 </label>
@@ -264,14 +267,14 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     value={loginPhone}
                     onChange={e => setLoginPhone(e.target.value)}
                     placeholder="785502919"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-base sm:text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
                     required
                   />
                   <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="scroll-mt-8">
+              <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   كلمة المرور
                 </label>
@@ -283,14 +286,14 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     value={loginPassword}
                     onChange={e => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 pr-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 pr-10 text-base sm:text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                     required
                   />
                   <Lock className="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword(prev => !prev)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1.5 rounded-lg"
                     title={showLoginPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
                   >
                     {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -301,7 +304,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full mt-2 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[44px] active:scale-[0.98] text-sm"
+                className="w-full mt-2 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[46px] active:scale-[0.98] text-sm"
               >
                 {loginLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -311,6 +314,17 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     <span>تسجيل الدخول للمختبر</span>
                   </>
                 )}
+              </button>
+
+              {/* Quick Demo Access for reviewers & students */}
+              <button
+                type="button"
+                onClick={handleQuickDemoLogin}
+                disabled={loginLoading}
+                className="w-full py-2.5 px-3 bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 hover:border-slate-700 flex items-center justify-center gap-2 transition-all"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>دخول سريع بحساب تجريبي (طالب معتمد)</span>
               </button>
 
               <div className="pt-1 text-center text-xs text-slate-400">
@@ -339,7 +353,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 </div>
               )}
 
-              <div className="scroll-mt-8">
+              <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   الاسم الكامل (طالب / مهندس)
                 </label>
@@ -350,14 +364,14 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     value={regFullName}
                     onChange={e => setRegFullName(e.target.value)}
                     placeholder="مثال: م. علي صالح الحكيمي"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-base sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
                     required
                   />
                   <User className="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="scroll-mt-8">
+              <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   رقم الهاتف (الواتساب للتفعيل)
                 </label>
@@ -369,15 +383,15 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     value={regPhone}
                     onChange={e => setRegPhone(e.target.value)}
                     placeholder="785502919"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-base sm:text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
                     required
                   />
                   <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              {/* Password Fields with Toggle */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 scroll-mt-8">
+              {/* Password Fields with Toggle - Responsive Stack */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
                     كلمة المرور
@@ -390,17 +404,17 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                       value={regPassword}
                       onChange={e => setRegPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-9 text-base sm:text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                       required
                     />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowRegPassword(prev => !prev)}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1.5"
                       title={showRegPassword ? 'إخفاء' : 'إظهار'}
                     >
-                      {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -417,24 +431,24 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                       value={regConfirmPassword}
                       onChange={e => setRegConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-9 text-base sm:text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                       required
                     />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowRegConfirmPassword(prev => !prev)}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1.5"
                       title={showRegConfirmPassword ? 'إخفاء' : 'إظهار'}
                     >
-                      {showRegConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showRegConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* MANDATORY QUESTION SECTION */}
-              <div className="pt-2 border-t border-slate-800 scroll-mt-8">
+              <div className="pt-2 border-t border-slate-800">
                 <div className="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs">
                   <HelpCircle className="w-4 h-4 shrink-0" />
                   <span>هل أنت مشترك في منصة أكاديمية الميكاترونكس اليمنية؟</span>
@@ -504,7 +518,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
               <button
                 type="submit"
                 disabled={regLoading}
-                className="w-full mt-2.5 py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[48px] active:scale-[0.98] text-sm"
+                className="w-full mt-3 py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[48px] active:scale-[0.98] text-sm"
               >
                 {regLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -516,7 +530,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 )}
               </button>
 
-              <div className="pt-1 pb-1 text-center text-xs text-slate-400">
+              <div className="pt-1 pb-2 text-center text-xs text-slate-400">
                 <span>لديك حساب بالفعل؟ </span>
                 <button
                   type="button"
@@ -529,16 +543,13 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                   تسجيل الدخول
                 </button>
               </div>
-
-              {/* Extra spacing to guarantee Android keyboard / navigation bar never obscures the buttons */}
-              <div className="h-6 sm:h-2" />
             </form>
           )}
         </div>
       </main>
 
       {/* Footer Info */}
-      <footer className="relative z-10 w-full max-w-4xl mx-auto pt-4 text-center text-xs text-slate-500 border-t border-slate-800/80">
+      <footer className="relative z-10 w-full max-w-4xl mx-auto pt-4 pb-6 text-center text-xs text-slate-500 border-t border-slate-800/80 px-4">
         <p>جميع الحقوق محفوظة © {new Date().getFullYear()} • منصة أكاديمية الميكاترونكس اليمنية</p>
         <p className="text-[11px] text-slate-600 mt-0.5">
           مستوحى من معايير المحاكاة الهندسية Circuit Wizard لشاشات الهواتف واللمس

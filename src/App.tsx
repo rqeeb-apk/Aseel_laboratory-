@@ -18,7 +18,7 @@ import {
   StudentProfile,
   LabExperiment,
 } from './types/circuit';
-import { Monitor, Smartphone } from 'lucide-react';
+import { Monitor, Smartphone, Sparkles } from 'lucide-react';
 import { COMPONENT_CATALOG } from './data/componentsCatalog';
 import { CURRICULUM_EXPERIMENTS } from './data/curriculumExperiments';
 import { runCircuitSimulation } from './engine/simulationEngine';
@@ -129,6 +129,7 @@ export default function App() {
   const [currentOwner, setCurrentOwner] = useState<OwnerUser | null>(null);
   const [isOwnerDashboardOpen, setIsOwnerDashboardOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isDemoPreviewActive, setIsDemoPreviewActive] = useState(false);
 
   // Check existing session on mount
   useEffect(() => {
@@ -177,6 +178,7 @@ export default function App() {
     setCurrentUser(null);
     setCurrentOwner(null);
     setIsOwnerDashboardOpen(false);
+    setIsDemoPreviewActive(false);
   };
 
   const handleRefreshUserStatus = async () => {
@@ -701,8 +703,8 @@ export default function App() {
     );
   }
 
-  // Logged in student but subscription is pending or suspended -> Block lab access and show status
-  if (currentUser && currentUser.subscriptionStatus !== 'active') {
+  // Logged in student but subscription is pending or suspended -> Block lab access unless exploring in demo mode
+  if (currentUser && currentUser.subscriptionStatus !== 'active' && !isDemoPreviewActive) {
     return (
       <>
         <PendingStatusView
@@ -710,6 +712,7 @@ export default function App() {
           onRefreshStatus={handleRefreshUserStatus}
           onLogout={handleLogout}
           onOpenChangePassword={() => setIsChangePasswordOpen(true)}
+          onEnterDemoMode={() => setIsDemoPreviewActive(true)}
         />
         <ChangePasswordModal
           isOpen={isChangePasswordOpen}
@@ -721,7 +724,6 @@ export default function App() {
 
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-slate-950 overflow-hidden font-sans select-none" dir="rtl">
-      {/* Top Application Toolbar */}
       {/* Top Application Toolbar */}
       <Toolbar
         isSimRunning={isSimRunning}
@@ -747,6 +749,22 @@ export default function App() {
         onLogout={handleLogout}
         simResult={simResult}
       />
+
+      {/* Guest/Demo Exploration Banner */}
+      {isDemoPreviewActive && currentUser && currentUser.subscriptionStatus !== 'active' && (
+        <div className="shrink-0 bg-gradient-to-r from-sky-950/95 to-slate-900 border-b border-sky-500/40 px-3 py-1.5 flex items-center justify-between text-[11px] text-sky-200 z-30">
+          <div className="flex items-center gap-1.5 truncate">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">🌟 وضع استكشاف المختبر (طالب زائر) • يمكنك اختبار المكونات وتبديل وضع العرض (جوال / سطح مكتب) بحرية</span>
+          </div>
+          <button
+            onClick={() => setIsDemoPreviewActive(false)}
+            className="px-2.5 py-0.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-bold shrink-0 mr-2 text-[10px] border border-sky-500/40"
+          >
+            عرض حالة التفعيل
+          </button>
+        </div>
+      )}
 
       {/* Mobile Notice Banner when Forced into Desktop Mode */}
       {isDesktopLayout && windowWidth < 1024 && (
