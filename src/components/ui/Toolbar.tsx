@@ -25,6 +25,7 @@ import {
   Menu,
   X,
   Sliders,
+  FileText,
 } from 'lucide-react';
 
 import { StudentUser, OwnerUser } from '../../types/auth';
@@ -45,6 +46,7 @@ interface ToolbarProps {
   onOpenMultimeter: () => void;
   onOpenCalculators: () => void;
   onOpenStudent: () => void;
+  onOpenLabReport?: () => void;
   onOpenWorkbenchModal?: () => void;
   currentUser?: StudentUser | null;
   currentOwner?: OwnerUser | null;
@@ -67,6 +69,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenMultimeter,
   onOpenCalculators,
   onOpenStudent,
+  onOpenLabReport,
   onOpenWorkbenchModal,
   currentUser,
   currentOwner,
@@ -251,6 +254,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <span>الحاسبات</span>
         </button>
 
+        {/* PDF Lab Report Export Button */}
+        {onOpenLabReport && (
+          <button
+            onClick={onOpenLabReport}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/35 rounded-xl text-xs font-bold transition-all min-h-[40px] shadow-sm hover:border-emerald-400/50"
+            title="تصدير تقرير المختبر كملف PDF منظم يحتوي على المخطط والقياسات"
+          >
+            <FileText className="w-3.5 h-3.5 text-emerald-400" />
+            <span>تقرير PDF</span>
+          </button>
+        )}
+
         {/* In-App PWA Install Button */}
         <div className="hidden sm:block">
           <PWAInstallButton compact />
@@ -384,6 +399,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 <Calculator className="w-4 h-4 text-emerald-400" />
                 <span>الحاسبات الهندسية</span>
               </button>
+
+              {onOpenLabReport && (
+                <button
+                  onClick={() => { onOpenLabReport(); setIsMobileMenuOpen(false); }}
+                  className="p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl flex items-center gap-2 text-emerald-300 font-bold"
+                >
+                  <FileText className="w-4 h-4 text-emerald-400" />
+                  <span>تقرير المختبر (PDF)</span>
+                </button>
+              )}
 
               {onOpenWorkbenchModal && (
                 <button

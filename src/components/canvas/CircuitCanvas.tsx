@@ -338,6 +338,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     >
       {/* SVG Canvas Area */}
       <svg
+        id="circuit-svg-canvas"
         ref={svgRef}
         className="w-full h-full cursor-crosshair"
         onPointerDown={handlePointerDown}

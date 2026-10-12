@@ -38,6 +38,7 @@ import { AuthScreen } from './components/auth/AuthScreen';
 import { PendingStatusView } from './components/auth/PendingStatusView';
 import { OwnerDashboardModal } from './components/auth/OwnerDashboardModal';
 import { ChangePasswordModal } from './components/auth/ChangePasswordModal';
+import { LabReportModal } from './components/report/LabReportModal';
 
 const STORAGE_KEYS = {
   PROFILE: 'ym_student_profile',
@@ -217,6 +218,7 @@ export default function App() {
   const [isMultimeterOpen, setIsMultimeterOpen] = useState(false);
   const [isCalculatorsOpen, setIsCalculatorsOpen] = useState(false);
   const [isStudentOpen, setIsStudentOpen] = useState(false);
+  const [isLabReportOpen, setIsLabReportOpen] = useState(false);
   const [isWorkbenchModalOpen, setIsWorkbenchModalOpen] = useState(false);
   const [editingElement, setEditingElement] = useState<CircuitElement | null>(null);
 
@@ -673,6 +675,7 @@ export default function App() {
         onOpenMultimeter={() => setIsMultimeterOpen(prev => !prev)}
         onOpenCalculators={() => setIsCalculatorsOpen(true)}
         onOpenStudent={() => setIsStudentOpen(true)}
+        onOpenLabReport={() => setIsLabReportOpen(true)}
         onOpenWorkbenchModal={() => setIsWorkbenchModalOpen(true)}
         currentUser={currentUser}
         currentOwner={currentOwner}
@@ -766,6 +769,7 @@ export default function App() {
         userPhone={currentUser?.phone}
         onOpenChangePassword={() => setIsChangePasswordOpen(true)}
         onLogout={handleLogout}
+        onOpenLabReport={() => setIsLabReportOpen(true)}
       />
 
       {/* Engineering Calculators Modal */}
@@ -811,6 +815,19 @@ export default function App() {
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
         onClose={() => setIsChangePasswordOpen(false)}
+      />
+
+      {/* Educational Lab Report PDF Generator Modal */}
+      <LabReportModal
+        isOpen={isLabReportOpen}
+        onClose={() => setIsLabReportOpen(false)}
+        elements={elements}
+        wires={wires}
+        simResult={simResult}
+        multimeterState={multimeterState}
+        studentProfile={studentProfile}
+        currentUser={currentUser}
+        renderStyle={renderStyle}
       />
     </div>
   );

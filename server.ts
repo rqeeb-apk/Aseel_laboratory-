@@ -102,15 +102,19 @@ function normalizePhone(rawPhone: string): string {
   return digits;
 }
 
-// Seed default owner if not present
+// Seed or update owner password to @Admin_aseel780# as requested
 const existingOwner = db.prepare('SELECT * FROM owner_credentials WHERE id = 1').get() as any;
+const { salt: newOwnerSalt, hash: newOwnerHash } = hashPassword('@Admin_aseel780#');
 if (!existingOwner) {
-  const { salt, hash } = hashPassword('admin785502919');
   db.prepare(`
     INSERT INTO owner_credentials (id, username, phone, password_salt, password_hash, updated_at)
     VALUES (1, 'owner', '785502919', ?, ?, ?)
-  `).run(salt, hash, new Date().toISOString());
-  console.log('✅ تم إنشاء حساب المالك الافتراضي (اسم المستخدم: 785502919 أو owner | كلمة المرور: admin785502919)');
+  `).run(newOwnerSalt, newOwnerHash, new Date().toISOString());
+  console.log('✅ تم إنشاء حساب المالك (اسم المستخدم: 785502919 أو owner | كلمة المرور: @Admin_aseel780#)');
+} else {
+  db.prepare('UPDATE owner_credentials SET password_salt = ?, password_hash = ?, updated_at = ? WHERE id = 1')
+    .run(newOwnerSalt, newOwnerHash, new Date().toISOString());
+  console.log('✅ تم تحديث كلمة مرور المالك بنجاح إلى: @Admin_aseel780#');
 }
 
 // Seed sample preapproved numbers if table is empty

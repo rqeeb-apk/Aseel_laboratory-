@@ -39,6 +39,7 @@ interface StudentNotebookProps {
   userPhone?: string;
   onOpenChangePassword?: () => void;
   onLogout?: () => void;
+  onOpenLabReport?: () => void;
 }
 
 export const StudentNotebook: React.FC<StudentNotebookProps> = ({
@@ -56,6 +57,7 @@ export const StudentNotebook: React.FC<StudentNotebookProps> = ({
   userPhone,
   onOpenChangePassword,
   onLogout,
+  onOpenLabReport,
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'circuits' | 'tests' | 'report'>('profile');
   const [saveName, setSaveName] = useState('');
@@ -526,13 +528,26 @@ export const StudentNotebook: React.FC<StudentNotebookProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {onOpenLabReport && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenLabReport();
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>فتح وتصدير التقرير الكامل كملف PDF (مع المخطط والقياسات)</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => window.print()}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-md transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition-colors"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>طباعة أو حفظ كملف PDF</span>
+                  <Printer className="w-4 h-4 text-emerald-400" />
+                  <span>طباعة سريعة</span>
                 </button>
               </div>
             </div>
