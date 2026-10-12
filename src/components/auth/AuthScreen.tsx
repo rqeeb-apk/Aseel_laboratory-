@@ -24,6 +24,7 @@ import {
 import { authService } from '../../services/authService';
 import { StudentUser, OwnerUser } from '../../types/auth';
 import { PWAInstallButton } from '../ui/PWAInstallButton';
+import { ProjectLogo } from '../ui/ProjectLogo';
 
 interface AuthScreenProps {
   onStudentSuccess: (user: StudentUser) => void;
@@ -163,15 +164,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
 
       {/* Top Bar with Discreet Owner Icon */}
       <header className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between pb-4 border-b border-slate-800/80">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <Cpu className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-slate-200">أكاديمية الميكاترونكس اليمنية</h1>
-            <p className="text-[11px] text-cyan-400 font-medium">المنصة التعليمية للمختبرات الهندسية</p>
-          </div>
-        </div>
+        <ProjectLogo variant="compact" size="sm" />
 
         <div className="flex items-center gap-2">
           <PWAInstallButton compact />
@@ -192,24 +185,10 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
       </header>
 
       {/* Main Content Box */}
-      <main className="relative z-10 w-full max-w-md mx-auto my-auto pt-6 pb-8">
-        {/* Branding & Logo Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 p-0.5 shadow-2xl shadow-cyan-500/25 mb-3">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <Zap className="w-8 h-8 text-cyan-400 animate-pulse" />
-            </div>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-            مختبر الميكاترونكس اليمني
-          </h2>
-          <p className="text-xs text-slate-400 font-mono tracking-wider mt-1">
-            YEMEN MECHATRONICS LAB
-          </p>
-          <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/40 text-cyan-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>تعلّم • حاكِ • جرّب • ابتكر</span>
-          </div>
+      <main className="relative z-10 w-full max-w-md mx-auto my-auto pt-4 pb-8">
+        {/* Official Branding & Logo Showcase */}
+        <div className="mb-6">
+          <ProjectLogo variant="full" size="xl" showSlogan />
         </div>
 
         {/* Auth Form Card */}

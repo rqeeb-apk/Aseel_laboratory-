@@ -659,7 +659,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-screen h-screen flex flex-col bg-slate-950 overflow-hidden font-sans" dir="rtl">
+    <div className="relative w-full h-[100dvh] flex flex-col bg-slate-950 overflow-hidden font-sans select-none" dir="rtl">
       {/* Top Application Toolbar */}
       <Toolbar
         isSimRunning={isSimRunning}

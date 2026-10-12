@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Gradients matching the official Yemen Mechatronics Lab branding -->
+    <linearGradient id="grad-cap" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2540"/>
+      <stop offset="100%" stop-color="#103b66"/>
+    </linearGradient>
+
+    <linearGradient id="grad-gear" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2540"/>
+      <stop offset="100%" stop-color="#0d3153"/>
+    </linearGradient>
+
+    <linearGradient id="grad-book-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="grad-book-base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2540"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+
+    <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(0, -10)">
+    <!-- ============================================== -->
+    <!-- 1. CIRCUIT TRACE LINES (Radiating Left & Right)-->
+    <!-- ============================================== -->
+    <!-- Left Blue Top Trace -->
+    <path d="M 140 240 L 250 240" fill="none" stroke="url(#grad-cyan)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="140" cy="240" r="14" fill="#ffffff" stroke="url(#grad-cyan)" stroke-width="7"/>
+
+    <!-- Left Amber/Gold Middle Trace -->
+    <path d="M 120 295 L 235 295" fill="none" stroke="url(#grad-gold)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="120" cy="295" r="14" fill="#ffffff" stroke="url(#grad-gold)" stroke-width="7"/>
+
+    <!-- Left Blue Bottom Trace -->
+    <path d="M 140 350 L 250 350" fill="none" stroke="url(#grad-cyan)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="140" cy="350" r="14" fill="#ffffff" stroke="url(#grad-cyan)" stroke-width="7"/>
+
+    <!-- Right Blue Top Trace -->
+    <path d="M 660 240 L 550 240" fill="none" stroke="url(#grad-cyan)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="660" cy="240" r="14" fill="#ffffff" stroke="url(#grad-cyan)" stroke-width="7"/>
+
+    <!-- Right Amber/Gold Middle Trace -->
+    <path d="M 680 295 L 565 295" fill="none" stroke="url(#grad-gold)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="680" cy="295" r="14" fill="#ffffff" stroke="url(#grad-gold)" stroke-width="7"/>
+
+    <!-- Right Blue Bottom Trace -->
+    <path d="M 660 350 L 550 350" fill="none" stroke="url(#grad-cyan)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="660" cy="350" r="14" fill="#ffffff" stroke="url(#grad-cyan)" stroke-width="7"/>
+
+    <!-- ============================================== -->
+    <!-- 2. MECHANICAL GEAR (Behind the Center)          -->
+    <!-- ============================================== -->
+    <g fill="url(#grad-gear)">
+      <!-- Central gear outer ring -->
+      <circle cx="400" cy="295" r="140"/>
+      <!-- Gear Cogs (12 teeth around circumference) -->
+      <!-- Top -->
+      <rect x="378" y="135" width="44" height="40" rx="6"/>
+      <!-- Bottom -->
+      <rect x="378" y="415" width="44" height="40" rx="6"/>
+      <!-- Left -->
+      <rect x="240" y="273" width="40" height="44" rx="6"/>
+      <!-- Right -->
+      <rect x="520" y="273" width="40" height="44" rx="6"/>
+      <!-- 30 deg -->
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(30 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(60 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(120 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(150 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(210 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(240 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(300 400 295)"/>
+      <rect x="378" y="135" width="44" height="40" rx="6" transform="rotate(330 400 295)"/>
+    </g>
+
+    <!-- White Inner Core of Gear -->
+    <circle cx="400" cy="295" r="92" fill="#ffffff"/>
+
+    <!-- ============================================== -->
+    <!-- 3. CENTRAL INTEGRATED CIRCUIT / MICROCHIP      -->
+    <!-- ============================================== -->
+    <!-- IC Outer Frame -->
+    <rect x="360" y="255" width="80" height="80" rx="14" fill="#ffffff" stroke="#0a2540" stroke-width="12"/>
+    <!-- Central CPU Die -->
+    <rect x="378" y="273" width="44" height="44" rx="6" fill="#0a2540"/>
+    
+    <!-- Chip Connection Pins / Nodes (Top, Bottom, Left, Right) -->
+    <!-- Top Pins -->
+    <line x1="382" y1="255" x2="382" y2="238" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="382" cy="235" r="6" fill="#0a2540"/>
+    <line x1="418" y1="255" x2="418" y2="238" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="418" cy="235" r="6" fill="#0a2540"/>
+    <line x1="400" y1="255" x2="400" y2="230" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="400" cy="226" r="6" fill="#0a2540"/>
+
+    <!-- Bottom Pins -->
+    <line x1="382" y1="335" x2="382" y2="352" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="382" cy="355" r="6" fill="#0a2540"/>
+    <line x1="418" y1="335" x2="418" y2="352" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="418" cy="355" r="6" fill="#0a2540"/>
+    <line x1="400" y1="335" x2="400" y2="360" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="400" cy="364" r="6" fill="#0a2540"/>
+
+    <!-- Left Pins -->
+    <line x1="360" y1="277" x2="343" y2="277" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="340" cy="277" r="6" fill="#0a2540"/>
+    <line x1="360" y1="313" x2="343" y2="313" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="340" cy="313" r="6" fill="#0a2540"/>
+    <line x1="360" y1="295" x2="335" y2="295" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="331" cy="295" r="6" fill="#0a2540"/>
+
+    <!-- Right Pins -->
+    <line x1="440" y1="277" x2="457" y2="277" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="460" cy="277" r="6" fill="#0a2540"/>
+    <line x1="440" y1="313" x2="457" y2="313" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="460" cy="313" r="6" fill="#0a2540"/>
+    <line x1="440" y1="295" x2="465" y2="295" stroke="#0a2540" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="469" cy="295" r="6" fill="#0a2540"/>
+
+    <!-- ============================================== -->
+    <!-- 4. ACADEMIC GRADUATION MORTARBOARD CAP         -->
+    <!-- ============================================== -->
+    <!-- Cap Base / Skullcap -->
+    <path d="M 290 145 C 290 200, 510 200, 510 145 Z" fill="url(#grad-cap)"/>
+    <path d="M 285 145 L 515 145" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Mortarboard Diamond Top -->
+    <polygon points="400,60 670,140 400,205 130,140" fill="url(#grad-cap)"/>
+    <!-- Subtle top highlight rim -->
+    <polyline points="130,140 400,60 670,140" fill="none" stroke="#2563eb" stroke-width="4" opacity="0.6"/>
+
+    <!-- Center Button on Cap -->
+    <ellipse cx="400" cy="133" rx="14" ry="9" fill="#0a2540" stroke="#38bdf8" stroke-width="3"/>
+
+    <!-- Tassel (Falling to the Right) -->
+    <path d="M 400 133 Q 560 140 570 190 L 570 230" fill="none" stroke="url(#grad-cyan)" stroke-width="5" stroke-linecap="round"/>
+    <!-- Tassel Fringe Ribbon -->
+    <path d="M 563 230 C 560 250, 580 250, 577 230 Z" fill="url(#grad-cyan)"/>
+    <line x1="567" y1="230" x2="567" y2="255" stroke="url(#grad-cyan)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="573" y1="230" x2="573" y2="255" stroke="url(#grad-cyan)" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- ============================================== -->
+    <!-- 5. OPEN ENGINEERING TEXTBOOK (Base Foundation) -->
+    <!-- ============================================== -->
+    <!-- Dark Blue Lower Base Book Pages -->
+    <path d="M 100 460 C 230 400, 370 450, 400 495 C 430 450, 570 400, 700 460 C 650 490, 470 470, 400 520 C 330 470, 150 490, 100 460 Z" fill="url(#grad-book-base)"/>
+
+    <!-- Vibrant Cyan-Blue Upper Swooshing Pages -->
+    <path d="M 120 420 C 240 370, 360 410, 400 460 C 440 410, 560 370, 680 420 C 630 450, 480 425, 400 480 C 320 425, 170 450, 120 420 Z" fill="url(#grad-book-top)"/>
+
+    <!-- Book Spine Rib -->
+    <path d="M 396 460 L 400 520 L 404 460 Z" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <!-- ============================================== -->
+  <!-- 6. TYPOGRAPHY & OFFICIAL MOTTO                 -->
+  <!-- ============================================== -->
+  <!-- Arabic Primary Title: مختبر الميكاترونكس اليمني -->
+  <text x="400" y="585" text-anchor="middle" font-family="'Cairo', 'Tajawal', 'Segoe UI', system-ui, sans-serif" font-size="52" font-weight="900" fill="#0a2540" letter-spacing="-0.5">
+    مختبر الميكاترونكس اليمني
+  </text>
+
+  <!-- English Secondary Title: Yemen Mechatronics Lab -->
+  <text x="400" y="640" text-anchor="middle" font-family="'Montserrat', 'Inter', 'Segoe UI', system-ui, sans-serif" font-size="34" font-weight="800" fill="#0a2540" letter-spacing="1">
+    Yemen Mechatronics Lab
+  </text>
+
+  <!-- Slogan Container Pill & Accent Flank Lines -->
+  <!-- Left accent line -->
+  <line x1="100" y1="700" x2="190" y2="700" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+  <!-- Right accent line -->
+  <line x1="610" y1="700" x2="700" y2="700" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Slogan Badge Pill -->
+  <rect x="200" y="675" width="400" height="50" rx="25" fill="#0284c7"/>
+  <text x="400" y="710" text-anchor="middle" font-family="'Cairo', 'Tajawal', 'Segoe UI', system-ui, sans-serif" font-size="24" font-weight="800" fill="#ffffff">
+    تعلَم • حاكِ • جرّب • ابتكر
+  </text>
+</svg>

@@ -31,6 +31,7 @@ import {
 import { StudentUser, OwnerUser } from '../../types/auth';
 import { Shield, LogOut } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
+import { ProjectLogo } from './ProjectLogo';
 
 interface ToolbarProps {
   isSimRunning: boolean;
@@ -81,21 +82,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <header className="h-14 sm:h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-2 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-4 shrink-0 select-none z-20" dir="rtl">
-      {/* Brand & Slogan */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-xs sm:text-sm shrink-0">
-          YM
+      {/* Brand & Emblem Logo - Responsive on Mobile, iPad, and Laptop */}
+      <div className="shrink-0 flex items-center">
+        <div className="hidden sm:block">
+          <ProjectLogo variant="compact" size="sm" />
         </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h1 className="text-xs sm:text-sm font-extrabold text-white tracking-tight truncate">
-              <span className="sm:hidden">مختبر الميكاترونكس</span>
-              <span className="hidden sm:inline">مختبر الميكاترونكس اليمني</span>
-            </h1>
-          </div>
-          <p className="text-[10px] text-slate-400 hidden xl:block">
-            تعلّم • حاكِ • جرّب • ابتكر
-          </p>
+        <div className="flex sm:hidden items-center gap-1.5">
+          <ProjectLogo variant="emblem" size="xs" />
+          <span className="text-xs font-black text-white truncate max-w-[125px]">
+            الميكاترونكس
+          </span>
         </div>
       </div>
 
@@ -162,7 +158,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
 
         {/* View Mode Segmented Selector */}
-        <div className="hidden xl:flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+        <div className="hidden lg:flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-xl">
           <button
             onClick={() => onChangeViewMode('normal')}
             className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${
@@ -248,7 +244,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
         <button
           onClick={onOpenCalculators}
-          className="hidden lg:flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold transition-all min-h-[40px]"
+          className="hidden md:flex items-center gap-1 px-3 py-2 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl text-xs font-bold transition-all min-h-[40px]"
         >
           <Calculator className="w-3.5 h-3.5 text-emerald-400" />
           <span>الحاسبات</span>
@@ -332,7 +328,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* Handle & Header */}
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-2" />
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <span className="text-xs font-bold text-white">أدوات وتحكم مختبر الميكاترونكس</span>
+              <ProjectLogo variant="compact" size="xs" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>

@@ -324,6 +324,52 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
     });
   };
 
+  // Desktop Mouse Wheel & Trackpad Pinch Zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+    const newZoom = Math.min(Math.max(zoom * zoomFactor, 0.3), 3.0);
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      setPan(prev => ({
+        x: mouseX - (mouseX - prev.x) * (newZoom / zoom),
+        y: mouseY - (mouseY - prev.y) * (newZoom / zoom),
+      }));
+    }
+    setZoom(newZoom);
+  };
+
+  // Desktop & Laptop Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && (selectedElementId || selectedWireId)) {
+        if (selectedElementId) onDeleteElement(selectedElementId);
+        else if (selectedWireId) onDeleteWire(selectedWireId);
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (selectedElementId) onRotateElement(selectedElementId);
+      } else if (e.key === 'Escape') {
+        onSelectElement(null);
+        onSelectWire(null);
+        setActivePin(null);
+        setDrawingWirePos(null);
+      } else if (e.key === '+' || e.key === '=') {
+        handleZoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        handleZoomOut();
+      } else if (e.key === '0') {
+        handleFitCircuit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElementId, selectedWireId, onDeleteElement, onDeleteWire, onRotateElement]);
+
   const selectedElement = elements.find(e => e.id === selectedElementId);
 
   const activeBgOption = WORKBENCH_BACKGROUNDS.find(b => b.id === workbenchBg);
@@ -335,6 +381,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
+      onWheel={handleWheel}
     >
       {/* SVG Canvas Area */}
       <svg

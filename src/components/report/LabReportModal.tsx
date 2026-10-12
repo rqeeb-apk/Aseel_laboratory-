@@ -17,6 +17,7 @@ import {
 import { StudentUser } from '../../types/auth';
 import { captureCircuitSnapshot } from '../../utils/circuitSnapshot';
 import { exportElementToPDF } from '../../utils/pdfExport';
+import { ProjectLogo } from '../ui/ProjectLogo';
 import {
   FileText,
   Download,
@@ -312,21 +313,21 @@ export const LabReportModal: React.FC<LabReportModalProps> = ({
             className="w-full max-w-[800px] bg-white text-slate-900 p-6 sm:p-8 rounded-2xl shadow-2xl space-y-6 font-sans print:shadow-none print:rounded-none print:p-8"
             style={{ minHeight: '1050px' }}
           >
-            {/* 1. ACADEMIC HEADER WITH LOGO & EMBLEM */}
-            <header className="border-b-2 border-slate-900 pb-4 flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block" />
+            {/* 1. ACADEMIC HEADER WITH OFFICIAL EMBLEM */}
+            <header className="border-b-2 border-slate-900 pb-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <ProjectLogo variant="emblem" size="lg" theme="light" />
+                <div className="space-y-0.5">
                   <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
                     {university}
                   </h1>
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-700">
+                    {department}
+                  </h2>
+                  <p className="text-[11px] font-semibold text-sky-700">
+                    مختبر الميكاترونكس اليمني (Yemen Mechatronics Lab)
+                  </p>
                 </div>
-                <h2 className="text-xs sm:text-sm font-bold text-slate-700">
-                  {department}
-                </h2>
-                <p className="text-[11px] font-semibold text-sky-700">
-                  مختبر الميكاترونكس والإلكترونيات الافتراضي (Yemen Mechatronics Lab)
-                </p>
               </div>
 
               <div className="text-left font-mono text-xs shrink-0 space-y-0.5 border-r pr-4 border-slate-200">

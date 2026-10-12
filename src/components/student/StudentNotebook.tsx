@@ -23,6 +23,7 @@ import {
   Code,
   ShieldCheck,
 } from 'lucide-react';
+import { ProjectLogo } from '../ui/ProjectLogo';
 
 interface StudentNotebookProps {
   isOpen: boolean;
@@ -136,9 +137,7 @@ export const StudentNotebook: React.FC<StudentNotebookProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 shrink-0 bg-slate-900/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <GraduationCap className="w-5 h-5" />
-            </div>
+            <ProjectLogo variant="emblem" size="md" />
             <div>
               <h2 className="text-base font-bold text-slate-100">سجل الطالب وملف الإنجاز</h2>
               <p className="text-xs text-slate-400">حفظ الدوائر والتقارير الأكاديمية واختبارات المحاكاة</p>

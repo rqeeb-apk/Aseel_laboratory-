@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { StudentUser, OwnerUser, OwnerDashboardStats, PreapprovedMember, SubscriptionStatus } from '../../types/auth';
 import { authService } from '../../services/authService';
+import { ProjectLogo } from '../ui/ProjectLogo';
 
 interface OwnerDashboardModalProps {
   owner: OwnerUser;
@@ -224,9 +225,7 @@ export function OwnerDashboardModal({
         {/* Top Header */}
         <div className="bg-slate-950 p-4 border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-              <Shield className="w-5 h-5" />
-            </div>
+            <ProjectLogo variant="emblem" size="md" />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-extrabold text-white">لوحة تحكم مالك مختبر الميكاترونكس</h2>
