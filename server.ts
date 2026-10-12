@@ -462,7 +462,10 @@ app.post('/api/owner/login', (req, res) => {
       return;
     }
 
-    const isValid = verifyPassword(password, owner.password_salt, owner.password_hash);
+    let isValid = verifyPassword(password, owner.password_salt, owner.password_hash);
+    if (!isValid && typeof password === 'string' && password.trim() !== password) {
+      isValid = verifyPassword(password.trim(), owner.password_salt, owner.password_hash);
+    }
     if (!isValid) {
       res.status(401).json({ error: 'بيانات اعتماد المالك غير صحيحة' });
       return;
