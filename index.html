@@ -2,6 +2,25 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Suppress benign Vite HMR WebSocket closed error in iframe / Cloud Run proxy
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event && event.reason && (
+          (event.reason.message && event.reason.message.indexOf('WebSocket') !== -1) ||
+          (event.reason.stack && event.reason.stack.indexOf('@vite/client') !== -1)
+        )) {
+          event.preventDefault();
+        }
+      });
+      window.addEventListener('error', function(event) {
+        if (event && (
+          (event.message && event.message.indexOf('WebSocket') !== -1) ||
+          (event.filename && event.filename.indexOf('@vite/client') !== -1)
+        )) {
+          event.preventDefault();
+        }
+      });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>مختبر الميكاترونكس اليمني | Yemen Mechatronics Lab</title>
     <meta name="description" content="مختبر إلكترونيات وميكاترونكس افتراضي متكامل لطلاب الجامعات اليمنية، يحاكي برنامج Circuit Wizard لشاشات اللمس والهواتف مع محرك محاكاة كهربائية حقيقي وتجارب تعليمية باللغة العربية." />
