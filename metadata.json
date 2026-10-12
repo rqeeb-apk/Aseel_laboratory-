@@ -1,0 +1,6 @@
+{
+  "name": "مختبر الميكاترونكس اليمني - Yemen Mechatronics Lab",
+  "description": "مختبر إلكترونيات وميكاترونكس افتراضي متكامل لطلاب الجامعات اليمنية، يحاكي برنامج Circuit Wizard لشاشات اللمس والهواتف مع محرك محاكاة كهربائية حقيقي وتجارب تعليمية باللغة العربية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
