@@ -26,12 +26,17 @@ import {
   X,
   Sliders,
   FileText,
+  MonitorSmartphone,
+  Smartphone,
+  Monitor,
 } from 'lucide-react';
 
 import { StudentUser, OwnerUser } from '../../types/auth';
 import { Shield, LogOut } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 import { ProjectLogo } from './ProjectLogo';
+import { DisplayMode } from '../../types/displayMode';
+import { DisplayModeSwitcher } from './DisplayModeSwitcher';
 
 interface ToolbarProps {
   isSimRunning: boolean;
@@ -42,6 +47,8 @@ interface ToolbarProps {
   onChangeViewMode: (mode: ViewMode) => void;
   renderStyle: RenderStyle;
   onChangeRenderStyle: (style: RenderStyle) => void;
+  displayMode: DisplayMode;
+  onChangeDisplayMode: (mode: DisplayMode) => void;
   onOpenLibrary: () => void;
   onOpenExperiments: () => void;
   onOpenMultimeter: () => void;
@@ -65,6 +72,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onChangeViewMode,
   renderStyle,
   onChangeRenderStyle,
+  displayMode,
+  onChangeDisplayMode,
   onOpenLibrary,
   onOpenExperiments,
   onOpenMultimeter,
@@ -250,6 +259,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <span>الحاسبات</span>
         </button>
 
+        {/* Display Mode Switcher (Required Feature) */}
+        <DisplayModeSwitcher
+          currentMode={displayMode}
+          onSelectMode={onChangeDisplayMode}
+        />
+
         {/* PDF Lab Report Export Button */}
         {onOpenLabReport && (
           <button
@@ -337,6 +352,64 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* PWA Install Button on Mobile */}
             <div className="pt-1">
               <PWAInstallButton />
+            </div>
+
+            {/* Display Mode Selection in Mobile Drawer */}
+            <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <MonitorSmartphone className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>وضع العرض:</span>
+                </span>
+                <span className="text-[10px] text-slate-500">حفظ تلقائي</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeDisplayMode('auto');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`py-2 px-1.5 rounded-lg text-[11px] font-bold text-center flex flex-col items-center gap-1 transition-all ${
+                    displayMode === 'auto'
+                      ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                      : 'bg-slate-900 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>تلقائي ⚡</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeDisplayMode('mobile');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`py-2 px-1.5 rounded-lg text-[11px] font-bold text-center flex flex-col items-center gap-1 transition-all ${
+                    displayMode === 'mobile'
+                      ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                      : 'bg-slate-900 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>جوال 📱</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeDisplayMode('desktop');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`py-2 px-1.5 rounded-lg text-[11px] font-bold text-center flex flex-col items-center gap-1 transition-all ${
+                    displayMode === 'desktop'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                      : 'bg-slate-900 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                  <span>كمبيوتر 🖥️</span>
+                </button>
+              </div>
             </div>
 
             {/* View Mode Selectors on Mobile */}

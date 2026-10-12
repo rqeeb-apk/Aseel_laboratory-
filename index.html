@@ -53,7 +53,14 @@
         font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
         touch-action: manipulation;
         -webkit-touch-callout: none;
-        user-select: none;
+      }
+      input, textarea, select, button {
+        user-select: auto;
+        -webkit-user-select: auto;
+      }
+      html, body, #root {
+        min-height: 100%;
+        min-height: 100dvh;
       }
       .font-mono-numbers {
         font-family: 'IBM Plex Mono', monospace;
@@ -61,7 +68,7 @@
       }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased overflow-hidden select-none">
+  <body class="bg-slate-950 text-slate-100 antialiased overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

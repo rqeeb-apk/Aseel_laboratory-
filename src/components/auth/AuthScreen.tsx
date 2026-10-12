@@ -20,6 +20,8 @@ import {
   AlertCircle,
   Sparkles,
   ExternalLink,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { StudentUser, OwnerUser } from '../../types/auth';
@@ -49,6 +51,11 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
   const [isAcademyMember, setIsAcademyMember] = useState<boolean | null>(null);
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
+
+  // Password visibility toggles for mobile convenience
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   // Owner modal state
   const [ownerUsername, setOwnerUsername] = useState('785502919');
@@ -157,16 +164,20 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between p-4 md:p-8 select-none relative overflow-y-auto">
+    <div
+      className="min-h-screen min-h-[100dvh] w-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between p-3 sm:p-6 md:p-8 relative overflow-y-auto overflow-x-hidden pb-24 sm:pb-12 overscroll-contain"
+      dir="rtl"
+    >
       {/* Decorative tech background glows */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Bar with Discreet Owner Icon */}
-      <header className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between pb-4 border-b border-slate-800/80">
-        <ProjectLogo variant="compact" size="sm" />
+      <header className="relative z-10 w-full max-w-4xl mx-auto flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800/80">
+        <ProjectLogo variant="compact" size="xs" className="sm:hidden" />
+        <ProjectLogo variant="compact" size="sm" className="hidden sm:flex" />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <PWAInstallButton compact />
 
           {/* Discreet Owner Entry Button */}
@@ -176,25 +187,31 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
               setIsOwnerModalOpen(true);
             }}
             title="دخول إدارة المختبر والمالك"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-amber-400 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-amber-400 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 transition-all shadow-sm active:scale-95"
           >
             <Shield className="w-3.5 h-3.5 text-amber-500" />
-            <span>بوابة الإدارة</span>
+            <span className="hidden xs:inline">بوابة الإدارة</span>
+            <span className="xs:hidden">الإدارة</span>
           </button>
         </div>
       </header>
 
-      {/* Main Content Box */}
-      <main className="relative z-10 w-full max-w-md mx-auto my-auto pt-4 pb-8">
+      {/* Main Content Box - Natural flex-1 expansion so scrolling is never clipped */}
+      <main className="relative z-10 w-full max-w-md mx-auto flex-1 flex flex-col justify-center py-2 sm:py-6 px-0">
         {/* Official Branding & Logo Showcase */}
-        <div className="mb-6">
-          <ProjectLogo variant="full" size="xl" showSlogan />
+        <div className="mb-3 sm:mb-6">
+          <div className="sm:hidden">
+            <ProjectLogo variant="full" size="md" showSlogan={false} />
+          </div>
+          <div className="hidden sm:block">
+            <ProjectLogo variant="full" size="xl" showSlogan />
+          </div>
         </div>
 
         {/* Auth Form Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 md:p-6 shadow-2xl backdrop-blur-md">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md">
           {/* Segmented Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800/80 rounded-xl mb-5">
+          <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800/80 rounded-xl mb-4 sm:mb-5">
             <button
               onClick={() => {
                 setActiveTab('login');
@@ -227,7 +244,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
 
           {/* TAB 1: LOGIN FORM */}
           {activeTab === 'login' && (
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <form onSubmit={handleLoginSubmit} className="space-y-3.5 sm:space-y-4">
               {loginError && (
                 <div className="p-3 bg-red-950/60 border border-red-800/70 rounded-xl text-xs text-red-200 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
@@ -235,46 +252,56 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <div className="scroll-mt-8">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   رقم الهاتف (اليمن)
                 </label>
                 <div className="relative">
                   <input
                     type="tel"
                     dir="ltr"
+                    autoComplete="tel"
                     value={loginPhone}
                     onChange={e => setLoginPhone(e.target.value)}
                     placeholder="785502919"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
                     required
                   />
-                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <div className="scroll-mt-8">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   كلمة المرور
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showLoginPassword ? 'text' : 'password'}
                     dir="ltr"
+                    autoComplete="current-password"
                     value={loginPassword}
                     onChange={e => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 pr-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                     required
                   />
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(prev => !prev)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                    title={showLoginPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full mt-2 py-3 sm:py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[44px] active:scale-[0.98] text-sm"
               >
                 {loginLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -286,7 +313,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 )}
               </button>
 
-              <div className="pt-2 text-center text-xs text-slate-400">
+              <div className="pt-1 text-center text-xs text-slate-400">
                 <span>ليس لديك حساب بعد؟ </span>
                 <button
                   type="button"
@@ -294,7 +321,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     setActiveTab('register');
                     setLoginError(null);
                   }}
-                  className="text-cyan-400 font-semibold hover:underline"
+                  className="text-cyan-400 font-semibold hover:underline py-1"
                 >
                   إنشاء حساب جديد
                 </button>
@@ -304,7 +331,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
 
           {/* TAB 2: REGISTER FORM */}
           {activeTab === 'register' && (
-            <form onSubmit={handleRegisterSubmit} className="space-y-4">
+            <form onSubmit={handleRegisterSubmit} className="space-y-3 sm:space-y-3.5">
               {regError && (
                 <div className="p-3 bg-red-950/60 border border-red-800/70 rounded-xl text-xs text-red-200 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
@@ -312,80 +339,102 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <div className="scroll-mt-8">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   الاسم الكامل (طالب / مهندس)
                 </label>
                 <div className="relative">
                   <input
                     type="text"
+                    autoComplete="name"
                     value={regFullName}
                     onChange={e => setRegFullName(e.target.value)}
                     placeholder="مثال: م. علي صالح الحكيمي"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
                     required
                   />
-                  <User className="w-4 h-4 text-slate-500 absolute right-3.5 top-3" />
+                  <User className="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <div className="scroll-mt-8">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   رقم الهاتف (الواتساب للتفعيل)
                 </label>
                 <div className="relative">
                   <input
                     type="tel"
                     dir="ltr"
+                    autoComplete="tel"
                     value={regPhone}
                     onChange={e => setRegPhone(e.target.value)}
                     placeholder="785502919"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 sm:py-3 pl-10 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-left"
                     required
                   />
-                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Password Fields with Toggle */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 scroll-mt-8">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     كلمة المرور
                   </label>
                   <div className="relative">
                     <input
-                      type="password"
+                      type={showRegPassword ? 'text' : 'password'}
                       dir="ltr"
+                      autoComplete="new-password"
                       value={regPassword}
                       onChange={e => setRegPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                       required
                     />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-3" />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegPassword(prev => !prev)}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                      title={showRegPassword ? 'إخفاء' : 'إظهار'}
+                    >
+                      {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     تأكيد كلمة المرور
                   </label>
                   <div className="relative">
                     <input
-                      type="password"
+                      type={showRegConfirmPassword ? 'text' : 'password'}
                       dir="ltr"
+                      autoComplete="new-password"
                       value={regConfirmPassword}
                       onChange={e => setRegConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 pl-9 pr-8 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all text-left"
                       required
                     />
-                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-3" />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegConfirmPassword(prev => !prev)}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                      title={showRegConfirmPassword ? 'إخفاء' : 'إظهار'}
+                    >
+                      {showRegConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* MANDATORY QUESTION SECTION */}
-              <div className="pt-2 border-t border-slate-800">
+              <div className="pt-2 border-t border-slate-800 scroll-mt-8">
                 <div className="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs">
                   <HelpCircle className="w-4 h-4 shrink-0" />
                   <span>هل أنت مشترك في منصة أكاديمية الميكاترونكس اليمنية؟</span>
@@ -396,7 +445,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                   <button
                     type="button"
                     onClick={() => setIsAcademyMember(true)}
-                    className={`p-3 rounded-xl border text-right transition-all flex items-start gap-2.5 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-right transition-all flex items-start gap-2.5 min-h-[52px] active:scale-[0.99] ${
                       isAcademyMember === true
                         ? 'bg-cyan-950/60 border-cyan-500 ring-1 ring-cyan-500 text-white'
                         : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -410,7 +459,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     <div>
                       <div className="text-xs font-bold text-slate-200">نعم، أنا مشترك</div>
                       <div className="text-[10px] text-slate-400 mt-0.5">
-                        سيتم التحقق من بيانات عضويتك مع إدارة الأكاديمية
+                        التحقق من العضوية مع إدارة الأكاديمية
                       </div>
                     </div>
                   </button>
@@ -419,7 +468,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                   <button
                     type="button"
                     onClick={() => setIsAcademyMember(false)}
-                    className={`p-3 rounded-xl border text-right transition-all flex items-start gap-2.5 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-right transition-all flex items-start gap-2.5 min-h-[52px] active:scale-[0.99] ${
                       isAcademyMember === false
                         ? 'bg-amber-950/60 border-amber-500 ring-1 ring-amber-500 text-white'
                         : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:border-slate-700'
@@ -433,7 +482,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     <div>
                       <div className="text-xs font-bold text-slate-200">لا، لست مشتركاً</div>
                       <div className="text-[10px] text-slate-400 mt-0.5">
-                        يتطلب الاشتراك عبر واتساب (785502919) لتفعيل المختبر
+                        الاشتراك عبر واتساب (785502919) لتفعيل المختبر
                       </div>
                     </div>
                   </button>
@@ -451,10 +500,11 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 )}
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={regLoading}
-                className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full mt-2.5 py-3.5 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 min-h-[48px] active:scale-[0.98] text-sm"
               >
                 {regLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -466,7 +516,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                 )}
               </button>
 
-              <div className="pt-1 text-center text-xs text-slate-400">
+              <div className="pt-1 pb-1 text-center text-xs text-slate-400">
                 <span>لديك حساب بالفعل؟ </span>
                 <button
                   type="button"
@@ -474,11 +524,14 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     setActiveTab('login');
                     setRegError(null);
                   }}
-                  className="text-cyan-400 font-semibold hover:underline"
+                  className="text-cyan-400 font-semibold hover:underline py-1"
                 >
                   تسجيل الدخول
                 </button>
               </div>
+
+              {/* Extra spacing to guarantee Android keyboard / navigation bar never obscures the buttons */}
+              <div className="h-6 sm:h-2" />
             </form>
           )}
         </div>

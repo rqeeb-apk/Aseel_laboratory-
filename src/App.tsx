@@ -18,6 +18,7 @@ import {
   StudentProfile,
   LabExperiment,
 } from './types/circuit';
+import { Monitor, Smartphone } from 'lucide-react';
 import { COMPONENT_CATALOG } from './data/componentsCatalog';
 import { CURRICULUM_EXPERIMENTS } from './data/curriculumExperiments';
 import { runCircuitSimulation } from './engine/simulationEngine';
@@ -39,6 +40,9 @@ import { PendingStatusView } from './components/auth/PendingStatusView';
 import { OwnerDashboardModal } from './components/auth/OwnerDashboardModal';
 import { ChangePasswordModal } from './components/auth/ChangePasswordModal';
 import { LabReportModal } from './components/report/LabReportModal';
+import { DisplayMode } from './types/displayMode';
+import { DesktopComponentLibraryPanel } from './components/desktop/DesktopComponentLibraryPanel';
+import { DesktopPropertiesInspector } from './components/desktop/DesktopPropertiesInspector';
 
 const STORAGE_KEYS = {
   PROFILE: 'ym_student_profile',
@@ -47,6 +51,7 @@ const STORAGE_KEYS = {
   WORKBENCH_BG: 'ym_workbench_bg',
   WORKBENCH_OPACITY: 'ym_workbench_opacity',
   SHOW_GRID: 'ym_show_grid',
+  DISPLAY_MODE: 'yemen_mechatronics_display_mode',
 };
 
 // Initial default Ohm's law circuit template
@@ -221,6 +226,62 @@ export default function App() {
   const [isLabReportOpen, setIsLabReportOpen] = useState(false);
   const [isWorkbenchModalOpen, setIsWorkbenchModalOpen] = useState(false);
   const [editingElement, setEditingElement] = useState<CircuitElement | null>(null);
+
+  // Display Mode State: 'auto' | 'mobile' | 'desktop'
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.DISPLAY_MODE);
+      if (saved === 'mobile' || saved === 'desktop' || saved === 'auto') {
+        return saved as DisplayMode;
+      }
+    } catch {}
+    return 'auto';
+  });
+
+  const handleSetDisplayMode = (mode: DisplayMode) => {
+    setDisplayMode(mode);
+    try {
+      localStorage.setItem(STORAGE_KEYS.DISPLAY_MODE, mode);
+    } catch {}
+  };
+
+  // Window width tracking for responsive layout calculation
+  const [windowWidth, setWindowWidth] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Active Layout determination
+  const isDesktopLayout =
+    displayMode === 'desktop' ||
+    (displayMode === 'auto' && windowWidth >= 1024);
+
+  // Desktop side panels collapse state
+  const [isDesktopLibraryCollapsed, setIsDesktopLibraryCollapsed] = useState(false);
+  const [isDesktopPropsCollapsed, setIsDesktopPropsCollapsed] = useState(false);
+
+  // Update specific property on an element (e.g. wiper position, light level)
+  const handleUpdateElementProperty = (id: string, property: string, value: any) => {
+    setElements(prev =>
+      prev.map(el => {
+        if (el.id === id) {
+          return {
+            ...el,
+            properties: {
+              ...el.properties,
+              [property]: value,
+            },
+          };
+        }
+        return el;
+      })
+    );
+  };
 
   // Workbench Physical Surface State
   const [workbenchBg, setWorkbenchBg] = useState<WorkbenchBackgroundId>(() => {
@@ -661,6 +722,7 @@ export default function App() {
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-slate-950 overflow-hidden font-sans select-none" dir="rtl">
       {/* Top Application Toolbar */}
+      {/* Top Application Toolbar */}
       <Toolbar
         isSimRunning={isSimRunning}
         onToggleSim={() => setIsSimRunning(prev => !prev)}
@@ -670,6 +732,8 @@ export default function App() {
         onChangeViewMode={setViewMode}
         renderStyle={renderStyle}
         onChangeRenderStyle={setRenderStyle}
+        displayMode={displayMode}
+        onChangeDisplayMode={handleSetDisplayMode}
         onOpenLibrary={() => setIsLibraryOpen(true)}
         onOpenExperiments={() => setIsExperimentsOpen(true)}
         onOpenMultimeter={() => setIsMultimeterOpen(prev => !prev)}
@@ -684,64 +748,137 @@ export default function App() {
         simResult={simResult}
       />
 
+      {/* Mobile Notice Banner when Forced into Desktop Mode */}
+      {isDesktopLayout && windowWidth < 1024 && (
+        <div className="shrink-0 bg-amber-950/90 border-b border-amber-500/40 px-3 py-1.5 flex items-center justify-between text-[11px] text-amber-200 z-30">
+          <div className="flex items-center gap-1.5 truncate">
+            <Monitor className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">🖥️ وضع سطح المكتب نشط — اسحب أفقياً للتنقل بين المكتبة والدائرة والخصائص</span>
+          </div>
+          <button
+            onClick={() => handleSetDisplayMode('mobile')}
+            className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold shrink-0 mr-2 text-[10px] border border-amber-500/30"
+          >
+            العودة للجوال 📱
+          </button>
+        </div>
+      )}
+
       {/* Main Interactive Circuit Workbench */}
-      <main className="relative flex-1 w-full h-full overflow-hidden">
-        <CircuitCanvas
-          elements={elements}
-          wires={wires}
-          selectedElementId={selectedElementId}
-          selectedWireId={selectedWireId}
-          viewMode={viewMode}
-          renderStyle={renderStyle}
-          simResult={simResult}
-          workbenchBg={workbenchBg}
-          workbenchOpacity={workbenchOpacity}
-          showGrid={showGrid}
-          onOpenWorkbenchSettings={() => setIsWorkbenchModalOpen(true)}
-          onSelectElement={setSelectedElementId}
-          onSelectWire={setSelectedWireId}
-          onUpdateElementPosition={handleUpdateElementPosition}
-          onRotateElement={handleRotateElement}
-          onDeleteElement={handleDeleteElement}
-          onDuplicateElement={handleDuplicateElement}
-          onDeleteWire={handleDeleteWire}
-          onAddWire={handleAddWire}
-          onToggleComponent={handleToggleComponent}
-          onEditElement={setEditingElement}
-        />
+      <main
+        className={`relative flex-1 w-full h-full overflow-hidden ${
+          isDesktopLayout && windowWidth < 1024 ? 'overflow-x-auto overflow-y-hidden' : ''
+        }`}
+      >
+        <div
+          className={`relative w-full h-full flex ${
+            isDesktopLayout && windowWidth < 1024 ? 'min-w-[1050px]' : ''
+          }`}
+        >
+          {/* 1. Desktop Mode: Docked Component Library Panel (Right Side in RTL) */}
+          {isDesktopLayout && (
+            <DesktopComponentLibraryPanel
+              onAddComponent={handleAddComponent}
+              isCollapsed={isDesktopLibraryCollapsed}
+              onToggleCollapse={() => setIsDesktopLibraryCollapsed(prev => !prev)}
+            />
+          )}
 
-        {/* Collapsible Component Library Drawer */}
-        <ComponentDrawer
-          isOpen={isLibraryOpen}
-          onClose={() => setIsLibraryOpen(false)}
-          onAddComponent={handleAddComponent}
-        />
+          {/* 2. Center Interactive Circuit Canvas */}
+          <div className="relative flex-1 h-full overflow-hidden">
+            <CircuitCanvas
+              elements={elements}
+              wires={wires}
+              selectedElementId={selectedElementId}
+              selectedWireId={selectedWireId}
+              viewMode={viewMode}
+              renderStyle={renderStyle}
+              simResult={simResult}
+              workbenchBg={workbenchBg}
+              workbenchOpacity={workbenchOpacity}
+              showGrid={showGrid}
+              onOpenWorkbenchSettings={() => setIsWorkbenchModalOpen(true)}
+              onSelectElement={setSelectedElementId}
+              onSelectWire={setSelectedWireId}
+              onUpdateElementPosition={handleUpdateElementPosition}
+              onRotateElement={handleRotateElement}
+              onDeleteElement={handleDeleteElement}
+              onDuplicateElement={handleDuplicateElement}
+              onDeleteWire={handleDeleteWire}
+              onAddWire={handleAddWire}
+              onToggleComponent={handleToggleComponent}
+              onEditElement={setEditingElement}
+            />
 
-        {/* Floating Digital Multimeter Instrument */}
-        {isMultimeterOpen && (
-          <DigitalMultimeter
-            multimeterState={multimeterState}
-            simResult={simResult}
-            elements={elements}
-            onClose={() => setIsMultimeterOpen(false)}
-            onUpdateMode={mode => setMultimeterState(prev => ({ ...prev, mode }))}
-            onConnectProbe={handleConnectProbe}
-            onDisconnectProbe={handleDisconnectProbe}
-          />
-        )}
+            {/* Floating Digital Multimeter Instrument (can be toggled in both modes) */}
+            {isMultimeterOpen && (
+              <DigitalMultimeter
+                multimeterState={multimeterState}
+                simResult={simResult}
+                elements={elements}
+                onClose={() => setIsMultimeterOpen(false)}
+                onUpdateMode={mode => setMultimeterState(prev => ({ ...prev, mode }))}
+                onConnectProbe={handleConnectProbe}
+                onDisconnectProbe={handleDisconnectProbe}
+              />
+            )}
+          </div>
+
+          {/* 3. Desktop Mode: Docked Properties & Live Measurements Inspector (Left Side in RTL) */}
+          {isDesktopLayout && (
+            <DesktopPropertiesInspector
+              selectedElement={elements.find(el => el.id === selectedElementId) || null}
+              selectedWireId={selectedWireId}
+              elements={elements}
+              wires={wires}
+              simResult={simResult}
+              multimeterState={multimeterState}
+              isSimRunning={isSimRunning}
+              renderStyle={renderStyle}
+              viewMode={viewMode}
+              onToggleSim={() => setIsSimRunning(prev => !prev)}
+              onResetSim={handleResetSim}
+              onClearCanvas={handleClearCanvas}
+              onChangeRenderStyle={setRenderStyle}
+              onChangeViewMode={setViewMode}
+              onRotateElement={handleRotateElement}
+              onDuplicateElement={handleDuplicateElement}
+              onDeleteElement={handleDeleteElement}
+              onDeleteWire={handleDeleteWire}
+              onEditElement={setEditingElement}
+              onToggleComponent={handleToggleComponent}
+              onUpdateElementProperty={handleUpdateElementProperty}
+              onOpenFullMultimeter={() => setIsMultimeterOpen(prev => !prev)}
+              onUpdateMultimeterMode={mode => setMultimeterState(prev => ({ ...prev, mode }))}
+              isCollapsed={isDesktopPropsCollapsed}
+              onToggleCollapse={() => setIsDesktopPropsCollapsed(prev => !prev)}
+            />
+          )}
+
+          {/* Collapsible Component Library Drawer (for Mobile Mode) */}
+          {!isDesktopLayout && (
+            <ComponentDrawer
+              isOpen={isLibraryOpen}
+              onClose={() => setIsLibraryOpen(false)}
+              onAddComponent={handleAddComponent}
+            />
+          )}
+        </div>
       </main>
 
-      {/* Bottom Thumb Zone Navigation Bar for Mobile Phones */}
-      <MobileBottomNav
-        activeScreen="canvas"
-        onNavigate={screen => {
-          if (screen === 'library') setIsLibraryOpen(true);
-          else if (screen === 'experiments') setIsExperimentsOpen(true);
-          else if (screen === 'multimeter') setIsMultimeterOpen(prev => !prev);
-          else if (screen === 'calculators') setIsCalculatorsOpen(true);
-          else if (screen === 'student') setIsStudentOpen(true);
-        }}
-      />
+      {/* Bottom Thumb Zone Navigation Bar for Mobile Phones (Only shown in Mobile Layout) */}
+      {!isDesktopLayout && (
+        <MobileBottomNav
+          activeScreen="canvas"
+          onNavigate={screen => {
+            if (screen === 'library') setIsLibraryOpen(true);
+            else if (screen === 'experiments') setIsExperimentsOpen(true);
+            else if (screen === 'multimeter') setIsMultimeterOpen(prev => !prev);
+            else if (screen === 'calculators') setIsCalculatorsOpen(true);
+            else if (screen === 'student') setIsStudentOpen(true);
+          }}
+        />
+      )}
 
       {/* University Curriculum Experiments Modal */}
       <ExperimentsModal
