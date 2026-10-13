@@ -52,6 +52,7 @@ const STORAGE_KEYS = {
   WORKBENCH_OPACITY: 'ym_workbench_opacity',
   SHOW_GRID: 'ym_show_grid',
   DISPLAY_MODE: 'yemen_mechatronics_display_mode',
+  RENDER_STYLE: 'yemen_mechatronics_render_style',
 };
 
 // Initial default Ohm's law circuit template
@@ -129,7 +130,6 @@ export default function App() {
   const [currentOwner, setCurrentOwner] = useState<OwnerUser | null>(null);
   const [isOwnerDashboardOpen, setIsOwnerDashboardOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isDemoPreviewActive, setIsDemoPreviewActive] = useState(false);
 
   // Check existing session on mount
   useEffect(() => {
@@ -178,7 +178,6 @@ export default function App() {
     setCurrentUser(null);
     setCurrentOwner(null);
     setIsOwnerDashboardOpen(false);
-    setIsDemoPreviewActive(false);
   };
 
   const handleRefreshUserStatus = async () => {
@@ -216,11 +215,29 @@ export default function App() {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [selectedWireId, setSelectedWireId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('current_flow');
-  const [renderStyle, setRenderStyle] = useState<RenderStyle>('schematic');
+  
+  // Render Style State: 'schematic' (مخطط رمزي) | 'realistic' (مخطط فعلي)
+  const [renderStyle, setRenderStyle] = useState<RenderStyle>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.RENDER_STYLE);
+      if (saved === 'realistic' || saved === 'schematic') {
+        return saved as RenderStyle;
+      }
+    } catch {}
+    return 'schematic';
+  });
+
+  const handleSetRenderStyle = (style: RenderStyle) => {
+    setRenderStyle(style);
+    try {
+      localStorage.setItem(STORAGE_KEYS.RENDER_STYLE, style);
+    } catch {}
+  };
+
   const [isSimRunning, setIsSimRunning] = useState<boolean>(true);
 
-  // Modal / Drawer visibility
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  // Modal / Drawer visibility (default true so components are open on the right in mobile)
+  const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isExperimentsOpen, setIsExperimentsOpen] = useState(false);
   const [isMultimeterOpen, setIsMultimeterOpen] = useState(false);
   const [isCalculatorsOpen, setIsCalculatorsOpen] = useState(false);
@@ -464,11 +481,14 @@ export default function App() {
     };
     const prefix = prefixMap[type] || 'EL';
 
+    const spawnBaseX = !isDesktopLayout ? 200 : 340;
+    const spawnBaseY = !isDesktopLayout ? 160 : 200;
+
     const newElement: CircuitElement = {
       id: `${type}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       type,
-      x: 340 + Math.floor(Math.random() * 40 - 20),
-      y: 200 + Math.floor(Math.random() * 40 - 20),
+      x: spawnBaseX + Math.floor(Math.random() * 40 - 20),
+      y: spawnBaseY + Math.floor(Math.random() * 40 - 20),
       rotation: 0,
       label: `${prefix}${countOfType}`,
       value: meta.defaultValue,
@@ -478,7 +498,7 @@ export default function App() {
 
     setElements(prev => [...prev, newElement]);
     setSelectedElementId(newElement.id);
-    setIsLibraryOpen(false);
+    // Keep library open on mobile so user can add components and immediately watch them added live!
   };
 
   const handleUpdateElementPosition = (id: string, x: number, y: number) => {
@@ -732,7 +752,7 @@ export default function App() {
         viewMode={viewMode}
         onChangeViewMode={setViewMode}
         renderStyle={renderStyle}
-        onChangeRenderStyle={setRenderStyle}
+        onChangeRenderStyle={handleSetRenderStyle}
         displayMode={displayMode}
         onChangeDisplayMode={handleSetDisplayMode}
         onOpenLibrary={() => setIsLibraryOpen(true)}
@@ -749,21 +769,7 @@ export default function App() {
         simResult={simResult}
       />
 
-      {/* Guest/Demo Exploration Banner */}
-      {isDemoPreviewActive && currentUser && currentUser.subscriptionStatus !== 'active' && (
-        <div className="shrink-0 bg-gradient-to-r from-sky-950/95 to-slate-900 border-b border-sky-500/40 px-3 py-1.5 flex items-center justify-between text-[11px] text-sky-200 z-30">
-          <div className="flex items-center gap-1.5 truncate">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="truncate">🌟 وضع استكشاف المختبر (طالب زائر) • يمكنك اختبار المكونات وتبديل وضع العرض (جوال / سطح مكتب) بحرية</span>
-          </div>
-          <button
-            onClick={() => setIsDemoPreviewActive(false)}
-            className="px-2.5 py-0.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-bold shrink-0 mr-2 text-[10px] border border-sky-500/40"
-          >
-            عرض حالة التفعيل
-          </button>
-        </div>
-      )}
+
 
       {/* Mobile Notice Banner when Forced into Desktop Mode */}
       {isDesktopLayout && windowWidth < 1024 && (
@@ -796,13 +802,39 @@ export default function App() {
           {isDesktopLayout && (
             <DesktopComponentLibraryPanel
               onAddComponent={handleAddComponent}
+              renderStyle={renderStyle}
+              onChangeRenderStyle={handleSetRenderStyle}
               isCollapsed={isDesktopLibraryCollapsed}
               onToggleCollapse={() => setIsDesktopLibraryCollapsed(prev => !prev)}
             />
           )}
 
-          {/* 2. Center Interactive Circuit Canvas */}
+          {/* 1.b Mobile Mode: Docked Component Library on the Right Side (Right in RTL) */}
+          {!isDesktopLayout && isLibraryOpen && (
+            <ComponentDrawer
+              isOpen={isLibraryOpen}
+              onClose={() => setIsLibraryOpen(false)}
+              onAddComponent={handleAddComponent}
+              renderStyle={renderStyle}
+              onChangeRenderStyle={handleSetRenderStyle}
+            />
+          )}
+
+          {/* 2. Interactive Circuit Canvas (Left of Library in RTL) */}
           <div className="relative flex-1 h-full overflow-hidden">
+            {/* Quick Reopen Button for Mobile when Library is Collapsed */}
+            {!isDesktopLayout && !isLibraryOpen && (
+              <button
+                type="button"
+                onClick={() => setIsLibraryOpen(true)}
+                className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/95 backdrop-blur-md border border-sky-500/50 rounded-xl text-sky-300 text-xs font-bold shadow-lg shadow-black/80 hover:bg-slate-800 active:scale-95 transition-all"
+                title="فتح مكتبة المكونات على يمين الشاشة"
+              >
+                <span>📦</span>
+                <span>المكونات</span>
+                <span className="text-[10px]">◀</span>
+              </button>
+            )}
             <CircuitCanvas
               elements={elements}
               wires={wires}
@@ -810,6 +842,7 @@ export default function App() {
               selectedWireId={selectedWireId}
               viewMode={viewMode}
               renderStyle={renderStyle}
+              onChangeRenderStyle={handleSetRenderStyle}
               simResult={simResult}
               workbenchBg={workbenchBg}
               workbenchOpacity={workbenchOpacity}
@@ -856,7 +889,7 @@ export default function App() {
               onToggleSim={() => setIsSimRunning(prev => !prev)}
               onResetSim={handleResetSim}
               onClearCanvas={handleClearCanvas}
-              onChangeRenderStyle={setRenderStyle}
+              onChangeRenderStyle={handleSetRenderStyle}
               onChangeViewMode={setViewMode}
               onRotateElement={handleRotateElement}
               onDuplicateElement={handleDuplicateElement}
@@ -872,23 +905,16 @@ export default function App() {
             />
           )}
 
-          {/* Collapsible Component Library Drawer (for Mobile Mode) */}
-          {!isDesktopLayout && (
-            <ComponentDrawer
-              isOpen={isLibraryOpen}
-              onClose={() => setIsLibraryOpen(false)}
-              onAddComponent={handleAddComponent}
-            />
-          )}
         </div>
       </main>
 
       {/* Bottom Thumb Zone Navigation Bar for Mobile Phones (Only shown in Mobile Layout) */}
       {!isDesktopLayout && (
         <MobileBottomNav
-          activeScreen="canvas"
+          activeScreen={isLibraryOpen ? 'library' : 'canvas'}
           onNavigate={screen => {
-            if (screen === 'library') setIsLibraryOpen(true);
+            if (screen === 'library') setIsLibraryOpen(prev => !prev);
+            else if (screen === 'canvas') setIsLibraryOpen(false);
             else if (screen === 'experiments') setIsExperimentsOpen(true);
             else if (screen === 'multimeter') setIsMultimeterOpen(prev => !prev);
             else if (screen === 'calculators') setIsCalculatorsOpen(true);

@@ -39,10 +39,6 @@ db.exec(`
     last_login_at TEXT
   );
 
-  try {
-    db.exec('ALTER TABLE users ADD COLUMN email TEXT;');
-  } catch {}
-
   CREATE TABLE IF NOT EXISTS preapproved_members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     phone TEXT UNIQUE NOT NULL,
@@ -77,6 +73,11 @@ db.exec(`
     updated_at TEXT NOT NULL
   );
 `);
+
+// Safe column migrations
+try {
+  db.exec('ALTER TABLE users ADD COLUMN email TEXT;');
+} catch {}
 
 // Crypto helpers
 function hashPassword(password: string): { salt: string; hash: string } {
@@ -146,8 +147,8 @@ const preapprovedCount = db.prepare('SELECT COUNT(*) as count FROM preapproved_m
 if (preapprovedCount?.count === 0) {
   const seedNumbers = [
     { phone: '785502919', name: 'إدارة أكاديمية الميكاترونكس', notes: 'الرقم الإداري للأكاديمية' },
-    { phone: '777000111', name: 'طالب معتمد تجريبي 1', notes: 'مشترك سنوي في الأكاديمية' },
-    { phone: '771234567', name: 'طالب معتمد تجريبي 2', notes: 'دفعة هندسة ميكاترونكس' },
+    { phone: '777000111', name: 'طالب معتمد في الأكاديمية 1', notes: 'مشترك سنوي في الأكاديمية' },
+    { phone: '771234567', name: 'طالب معتمد في الأكاديمية 2', notes: 'دفعة هندسة ميكاترونكس' },
   ];
   const insertPre = db.prepare('INSERT OR IGNORE INTO preapproved_members (phone, name, notes, added_at) VALUES (?, ?, ?, ?)');
   for (const s of seedNumbers) {
@@ -155,7 +156,7 @@ if (preapprovedCount?.count === 0) {
   }
 }
 
-// Seed demo active student if not present
+// Seed active student if not present
 const existingDemoUser = db.prepare('SELECT id FROM users WHERE phone = ?').get('777000111');
 if (!existingDemoUser) {
   const { salt: demoSalt, hash: demoHash } = hashPassword('password123');
@@ -165,7 +166,7 @@ if (!existingDemoUser) {
     INSERT INTO users (id, phone, full_name, password_salt, password_hash, is_academy_member, subscription_status, subscription_expires_at, created_at)
     VALUES (?, ?, ?, ?, ?, 1, 'active', ?, ?)
   `).run('demo_std_1', '777000111', 'م. علي صالح (طالب معتمد)', demoSalt, demoHash, oneYearFromNow.toISOString(), new Date().toISOString());
-  console.log('✅ تم تهيئة حساب طالب معتمد تجريبي (هاتف: 777000111 | كلمة المرور: password123)');
+  console.log('✅ تم تهيئة حساب طالب معتمد (هاتف: 777000111)');
 }
 
 // Session middleware helpers

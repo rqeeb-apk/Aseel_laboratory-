@@ -58,8 +58,8 @@ export const localAuthStore = {
       if (!localStorage.getItem(KEYS.PREAPPROVED)) {
         const initialPre: PreapprovedMember[] = [
           { id: 1, phone: '785502919', name: 'إدارة أكاديمية الميكاترونكس', notes: 'الرقم الإداري للأكاديمية', added_at: new Date().toISOString() },
-          { id: 2, phone: '777000111', name: 'طالب معتمد تجريبي 1', notes: 'مشترك سنوي في الأكاديمية', added_at: new Date().toISOString() },
-          { id: 3, phone: '771234567', name: 'طالب معتمد تجريبي 2', notes: 'دفعة هندسة ميكاترونكس', added_at: new Date().toISOString() },
+          { id: 2, phone: '777000111', name: 'طالب معتمد في الأكاديمية 1', notes: 'مشترك سنوي في الأكاديمية', added_at: new Date().toISOString() },
+          { id: 3, phone: '771234567', name: 'طالب معتمد في الأكاديمية 2', notes: 'دفعة هندسة ميكاترونكس', added_at: new Date().toISOString() },
         ];
         localStorage.setItem(KEYS.PREAPPROVED, JSON.stringify(initialPre));
       }
@@ -68,7 +68,7 @@ export const localAuthStore = {
           {
             id: 'std_demo_1',
             phone: '777000111',
-            fullName: 'مهندس ميكاترونكس تجريبي',
+            fullName: 'مهندس ميكاترونكس معتمد',
             isAcademyMember: true,
             subscriptionStatus: 'active',
             createdAt: new Date().toISOString(),

@@ -38,6 +38,7 @@ interface CircuitCanvasProps {
   selectedWireId: string | null;
   viewMode: ViewMode;
   renderStyle: RenderStyle;
+  onChangeRenderStyle?: (style: RenderStyle) => void;
   simResult: SimulationResult;
   workbenchBg?: WorkbenchBackgroundId;
   workbenchOpacity?: number;
@@ -62,6 +63,7 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   selectedWireId,
   viewMode,
   renderStyle,
+  onChangeRenderStyle,
   simResult,
   workbenchBg = 'esd_green',
   workbenchOpacity = 0.7,
@@ -504,6 +506,38 @@ export const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
           ))}
         </g>
       </svg>
+
+      {/* Floating Diagram Style Switcher: مخطط رمزي (Schematic) vs مخطط فعلي (Physical/Realistic) */}
+      {onChangeRenderStyle && (
+        <div className="absolute top-3 left-3 sm:left-6 z-20 flex items-center p-1 bg-slate-900/95 backdrop-blur-md border border-slate-700/90 rounded-2xl shadow-2xl shadow-black/80 select-none ring-1 ring-white/5">
+          <button
+            type="button"
+            onClick={() => onChangeRenderStyle('schematic')}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-xl transition-all active:scale-95 ${
+              renderStyle === 'schematic'
+                ? 'bg-sky-500 text-white shadow-md shadow-sky-500/35 ring-1 ring-sky-300/40'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            }`}
+            title="تفعيل المخطط الرمزي القياسي (IEC/IEEE Schematic Symbols)"
+          >
+            <span className="text-xs sm:text-sm">📐</span>
+            <span className="text-[11px] sm:text-xs font-bold">مخطط رمزي</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeRenderStyle('realistic')}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-xl transition-all active:scale-95 ${
+              renderStyle === 'realistic'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/35 ring-1 ring-amber-300/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            }`}
+            title="تفعيل المخطط الفعلي الحقيقي للمكونات (Realistic Physical View)"
+          >
+            <span className="text-xs sm:text-sm">🔌</span>
+            <span className="text-[11px] sm:text-xs font-bold">مخطط فعلي</span>
+          </button>
+        </div>
+      )}
 
       {/* Floating Quick Action Bar when a Component is Selected */}
       {selectedElement && (

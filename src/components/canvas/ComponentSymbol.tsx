@@ -369,6 +369,417 @@ export const ComponentSymbol: React.FC<ComponentSymbolProps> = ({
           </g>
         );
 
+      case 'nand_gate':
+        return (
+          <g>
+            <line x1="-40" y1="-15" x2="-18" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-18" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="26" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -18 -24 L 2 -24 A 24 24 0 0 1 2 24 L -18 24 Z" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+            <circle cx="23" cy="0" r="3.5" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+            <text x="-6" y="4" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">&amp;</text>
+          </g>
+        );
+
+      case 'nor_gate':
+        return (
+          <g>
+            <line x1="-40" y1="-15" x2="-14" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-14" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="26" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -20 -24 Q -8 0 -20 24 Q 4 22 20 0 Q 4 -22 -20 -24 Z" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+            <circle cx="23" cy="0" r="3.5" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+            <text x="-4" y="4" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">≥</text>
+          </g>
+        );
+
+      case 'xor_gate':
+        return (
+          <g>
+            <line x1="-40" y1="-15" x2="-14" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-14" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="22" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -24 -24 Q -12 0 -24 24" fill="none" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -18 -24 Q -6 0 -18 24 Q 4 22 22 0 Q 4 -22 -18 -24 Z" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+            <text x="-2" y="4" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">=1</text>
+          </g>
+        );
+
+      case 'xnor_gate':
+        return (
+          <g>
+            <line x1="-40" y1="-15" x2="-14" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-14" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="26" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -24 -24 Q -12 0 -24 24" fill="none" stroke="#38bdf8" strokeWidth="2" />
+            <path d="M -18 -24 Q -6 0 -18 24 Q 4 22 20 0 Q 4 -22 -18 -24 Z" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+            <circle cx="23" cy="0" r="3.5" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+            <text x="-2" y="4" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">=1</text>
+          </g>
+        );
+
+      case 'opamp':
+        return (
+          <g>
+            {/* Standard Op-Amp Triangle */}
+            <polygon points="-24,-25 -24,25 24,0" fill="#0f172a" stroke="#c084fc" strokeWidth="2.5" />
+            {/* Input leads */}
+            <line x1="-40" y1="-15" x2="-24" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-24" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            {/* Output lead */}
+            <line x1="24" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            {/* Signs */}
+            <text x="-16" y="-11" fill="#ef4444" fontSize="12" fontWeight="bold">+</text>
+            <text x="-16" y="19" fill="#94a3b8" fontSize="14" fontWeight="bold">-</text>
+            <text x="2" y="4" textAnchor="middle" fill="#c084fc" fontSize="8" fontWeight="bold">LM741</text>
+          </g>
+        );
+
+      case 'regulator_7805':
+        return (
+          <g>
+            <rect x="-30" y="-22" width="60" height="44" rx="4" fill="#0f172a" stroke="#10b981" strokeWidth="2" />
+            <line x1="-40" y1="0" x2="-30" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="30" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="0" y1="22" x2="0" y2="30" stroke="#38bdf8" strokeWidth="2" />
+            <text x="0" y="-3" textAnchor="middle" fill="#10b981" fontSize="10" fontWeight="bold">7805</text>
+            <text x="0" y="10" textAnchor="middle" fill="#6ee7b7" fontSize="8">+5V REG</text>
+            <text x="-22" y="3" fill="#94a3b8" fontSize="7">IN</text>
+            <text x="14" y="3" fill="#94a3b8" fontSize="7">OUT</text>
+            <text x="3" y="19" fill="#94a3b8" fontSize="6">GND</text>
+          </g>
+        );
+
+      case 'switch_spdt': {
+        const pos = element.properties.position === 2 ? 2 : 1;
+        return (
+          <g>
+            {/* Common terminal at left */}
+            <circle cx="-40" cy="0" r="3" fill="#38bdf8" />
+            <line x1="-40" y1="0" x2="-20" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="-20" cy="0" r="3.5" fill="#f8fafc" />
+            {/* Fixed contact 1 at top right */}
+            <circle cx="20" cy="-15" r="3.5" fill="#f8fafc" />
+            <line x1="20" y1="-15" x2="40" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="40" cy="-15" r="3" fill="#38bdf8" />
+            {/* Fixed contact 2 at bottom right */}
+            <circle cx="20" cy="15" r="3.5" fill="#f8fafc" />
+            <line x1="20" y1="15" x2="40" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="40" cy="15" r="3" fill="#38bdf8" />
+            {/* Movable arm */}
+            <line
+              x1="-20"
+              y1="0"
+              x2="18"
+              y2={pos === 1 ? -14 : 14}
+              stroke="#38bdf8"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <text x="-2" y="2" textAnchor="middle" fill="#64748b" fontSize="8">SPDT</text>
+          </g>
+        );
+      }
+
+      case 'switch_dpdt': {
+        return (
+          <g>
+            <rect x="-35" y="-30" width="70" height="60" rx="4" fill="#0f172a" stroke="#0284c7" strokeWidth="1.5" strokeDasharray="3 3" />
+            {/* Pole 1 */}
+            <line x1="-40" y1="-15" x2="-20" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="-20" cy="-15" r="3" fill="#f8fafc" />
+            <line x1="-20" y1="-15" x2="16" y2="-23" stroke="#38bdf8" strokeWidth="2.5" />
+            <circle cx="20" cy="-25" r="3" fill="#f8fafc" />
+            <line x1="20" y1="-25" x2="40" y2="-25" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="20" cy="-5" r="3" fill="#f8fafc" />
+            <line x1="20" y1="-5" x2="40" y2="-5" stroke="#38bdf8" strokeWidth="2" />
+            {/* Pole 2 */}
+            <line x1="-40" y1="15" x2="-20" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="-20" cy="15" r="3" fill="#f8fafc" />
+            <line x1="-20" y1="15" x2="16" y2="7" stroke="#38bdf8" strokeWidth="2.5" />
+            <circle cx="20" cy="5" r="3" fill="#f8fafc" />
+            <line x1="20" y1="5" x2="40" y2="5" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="20" cy="25" r="3" fill="#f8fafc" />
+            <line x1="20" y1="25" x2="40" y2="25" stroke="#38bdf8" strokeWidth="2" />
+            {/* Mechanical link */}
+            <line x1="-2" y1="-19" x2="-2" y2="11" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="2 2" />
+            <text x="0" y="32" textAnchor="middle" fill="#64748b" fontSize="7">DPDT</text>
+          </g>
+        );
+      }
+
+      case 'relay_spdt': {
+        const isEnergized = !!element.properties.isEnergized;
+        return (
+          <g>
+            <rect x="-35" y="-30" width="70" height="60" rx="4" fill="#0f172a" stroke="#8b5cf6" strokeWidth="1.5" />
+            {/* Coil at left */}
+            <line x1="-40" y1="-20" x2="-22" y2="-20" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="20" x2="-22" y2="20" stroke="#38bdf8" strokeWidth="2" />
+            {/* Inductor coil loops */}
+            <path
+              d="M -22 -20 Q -10 -15 -22 -10 Q -10 -5 -22 0 Q -10 5 -22 10 Q -10 15 -22 20"
+              fill="none"
+              stroke={isEnergized ? '#a855f7' : '#fbbf24'}
+              strokeWidth="2.5"
+            />
+            {/* Magnetic core bars */}
+            <line x1="-7" y1="-18" x2="-7" y2="18" stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1="-4" y1="-18" x2="-4" y2="18" stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Switch contacts at right */}
+            <circle cx="16" cy="0" r="3" fill="#f8fafc" />
+            <line x1="16" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="28" cy="-25" r="3" fill="#f8fafc" />
+            <line x1="28" y1="-25" x2="40" y2="-25" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="28" cy="25" r="3" fill="#f8fafc" />
+            <line x1="28" y1="25" x2="40" y2="25" stroke="#38bdf8" strokeWidth="2" />
+            {/* Arm */}
+            <line
+              x1="16"
+              y1="0"
+              x2="26"
+              y2={isEnergized ? -23 : 23}
+              stroke="#38bdf8"
+              strokeWidth="2.5"
+            />
+            <text x="3" y="-2" textAnchor="middle" fill="#c084fc" fontSize="8" fontWeight="bold">RELAY</text>
+          </g>
+        );
+      }
+
+      case 'buzzer': {
+        const isActive = !!element.properties.isActive;
+        return (
+          <g>
+            <line x1="-30" y1="0" x2="-14" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="14" y1="0" x2="30" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            {/* Buzzer cup/bell */}
+            <path d="M -14 -16 L 14 -16 L 14 0 L 8 0 L 8 16 L -8 16 L -8 0 L -14 0 Z" fill="#0f172a" stroke="#f59e0b" strokeWidth="2" />
+            {isActive && (
+              <g stroke="#f59e0b" strokeWidth="1.5" fill="none">
+                <path d="M 18 -10 Q 24 -5 18 0" />
+                <path d="M 22 -14 Q 30 -5 22 4" />
+              </g>
+            )}
+            <text x="0" y="8" textAnchor="middle" fill="#f59e0b" fontSize="8" fontWeight="bold">BZ</text>
+          </g>
+        );
+      }
+
+      case 'seven_segment': {
+        return (
+          <g>
+            <rect x="-26" y="-34" width="52" height="68" rx="4" fill="#020617" stroke="#38bdf8" strokeWidth="2" />
+            {/* Simulated 7 segments */}
+            <line x1="-12" y1="-20" x2="12" y2="-20" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="14" y1="-18" x2="14" y2="-4" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="14" y1="2" x2="14" y2="16" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="-12" y1="18" x2="12" y2="18" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="-14" y1="2" x2="-14" y2="16" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="-14" y1="-18" x2="-14" y2="-4" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="-12" y1="-1" x2="12" y2="-1" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+            <circle cx="18" cy="20" r="2" fill="#ef4444" />
+            <text x="0" y="32" textAnchor="middle" fill="#94a3b8" fontSize="7">7-SEG</text>
+          </g>
+        );
+      }
+
+      case 'ultrasonic_sensor': {
+        const dist = element.properties.distanceCm || element.value || 25;
+        return (
+          <g>
+            <rect x="-35" y="-25" width="70" height="50" rx="6" fill="#0f172a" stroke="#0284c7" strokeWidth="2" />
+            <circle cx="-16" cy="0" r="12" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
+            <text x="-16" y="3" textAnchor="middle" fill="#38bdf8" fontSize="8" fontWeight="bold">T</text>
+            <circle cx="16" cy="0" r="12" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
+            <text x="16" y="3" textAnchor="middle" fill="#38bdf8" fontSize="8" fontWeight="bold">R</text>
+            <text x="0" y="20" textAnchor="middle" fill="#6ee7b7" fontSize="8" fontFamily="IBM Plex Mono">{dist}cm</text>
+          </g>
+        );
+      }
+
+      case 'servo_motor': {
+        const angle = element.properties.angle ?? 90;
+        return (
+          <g>
+            <rect x="-30" y="-22" width="60" height="44" rx="4" fill="#0f172a" stroke="#0284c7" strokeWidth="2" />
+            <circle cx="12" cy="0" r="12" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
+            {/* Horn indicator */}
+            <line
+              x1="12"
+              y1="0"
+              x2={12 + 10 * Math.cos((angle - 90) * (Math.PI / 180))}
+              y2={10 * Math.sin((angle - 90) * (Math.PI / 180))}
+              stroke="#f59e0b"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <circle cx="12" cy="0" r="3" fill="#f59e0b" />
+            <text x="-12" y="3" textAnchor="middle" fill="#38bdf8" fontSize="9" fontWeight="bold">SERVO</text>
+            <text x="-12" y="14" textAnchor="middle" fill="#f59e0b" fontSize="8">{angle}°</text>
+          </g>
+        );
+      }
+
+      case 'stepper_motor': {
+        return (
+          <g>
+            <rect x="-32" y="-28" width="64" height="56" rx="4" fill="#0f172a" stroke="#6366f1" strokeWidth="2" />
+            <circle cx="0" cy="0" r="16" fill="#1e293b" stroke="#818cf8" strokeWidth="1.5" />
+            <text x="0" y="3" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">STEP</text>
+            <text x="0" y="22" textAnchor="middle" fill="#94a3b8" fontSize="7">1.8°/Step</text>
+          </g>
+        );
+      }
+
+      case 'ac_source': {
+        const v = element.properties.amplitude || element.value || 12;
+        return (
+          <g>
+            <circle cx="0" cy="0" r="24" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+            <line x1="-40" y1="0" x2="-24" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="24" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            {/* Sine wave */}
+            <path d="M -12 0 Q -6 -12 0 0 Q 6 12 12 0" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
+            <text x="0" y="17" textAnchor="middle" fill="#38bdf8" fontSize="8" fontWeight="bold">{v}V~</text>
+          </g>
+        );
+      }
+
+      case 'current_source': {
+        const i = element.properties.currentA ? (element.properties.currentA * 1000).toFixed(0) : element.value;
+        return (
+          <g>
+            <circle cx="0" cy="0" r="24" fill="#0f172a" stroke="#10b981" strokeWidth="2.5" />
+            <line x1="-40" y1="0" x2="-24" y2="0" stroke="#10b981" strokeWidth="2" />
+            <line x1="24" y1="0" x2="40" y2="0" stroke="#10b981" strokeWidth="2" />
+            {/* Arrow */}
+            <line x1="-12" y1="0" x2="12" y2="0" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
+            <polygon points="12,0 6,-5 6,5" fill="#10b981" />
+            <text x="0" y="17" textAnchor="middle" fill="#10b981" fontSize="8" fontWeight="bold">{i}mA</text>
+          </g>
+        );
+      }
+
+      case 'transformer': {
+        return (
+          <g>
+            {/* Primary coil */}
+            <path d="M -20 -15 Q -10 -10 -20 -5 Q -10 0 -20 5 Q -10 10 -20 15" fill="none" stroke="#fbbf24" strokeWidth="2.5" />
+            <line x1="-40" y1="-15" x2="-20" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-40" y1="15" x2="-20" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            {/* Magnetic core */}
+            <line x1="-3" y1="-20" x2="-3" y2="20" stroke="#94a3b8" strokeWidth="2" />
+            <line x1="3" y1="-20" x2="3" y2="20" stroke="#94a3b8" strokeWidth="2" />
+            {/* Secondary coil */}
+            <path d="M 20 -15 Q 10 -10 20 -5 Q 10 0 20 5 Q 10 10 20 15" fill="none" stroke="#fbbf24" strokeWidth="2.5" />
+            <line x1="20" y1="-15" x2="40" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="20" y1="15" x2="40" y2="15" stroke="#38bdf8" strokeWidth="2" />
+            <text x="0" y="28" textAnchor="middle" fill="#94a3b8" fontSize="7">TRANS</text>
+          </g>
+        );
+      }
+
+      case 'mosfet_n': {
+        return (
+          <g>
+            <circle cx="0" cy="0" r="26" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+            {/* Gate */}
+            <line x1="-30" y1="0" x2="-14" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-14" y1="-15" x2="-14" y2="15" stroke="#38bdf8" strokeWidth="2.5" />
+            {/* Insulated gap & Channel bars */}
+            <line x1="-8" y1="-15" x2="-8" y2="-7" stroke="#38bdf8" strokeWidth="2.5" />
+            <line x1="-8" y1="-4" x2="-8" y2="4" stroke="#38bdf8" strokeWidth="2.5" />
+            <line x1="-8" y1="7" x2="-8" y2="15" stroke="#38bdf8" strokeWidth="2.5" />
+            {/* Drain */}
+            <line x1="-8" y1="-11" x2="16" y2="-11" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="-11" x2="20" y2="-30" stroke="#38bdf8" strokeWidth="2" />
+            {/* Source */}
+            <line x1="-8" y1="11" x2="16" y2="11" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="11" x2="20" y2="30" stroke="#38bdf8" strokeWidth="2" />
+            {/* Substrate arrow inward for N-channel */}
+            <line x1="-8" y1="0" x2="16" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="0" x2="16" y2="11" stroke="#38bdf8" strokeWidth="2" />
+            <polygon points="-8,0 -2,-4 -2,4" fill="#38bdf8" />
+            <text x="-4" y="22" textAnchor="middle" fill="#64748b" fontSize="7">NMOS</text>
+          </g>
+        );
+      }
+
+      case 'mosfet_p': {
+        return (
+          <g>
+            <circle cx="0" cy="0" r="26" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+            {/* Gate */}
+            <line x1="-30" y1="0" x2="-14" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="-14" y1="-15" x2="-14" y2="15" stroke="#38bdf8" strokeWidth="2.5" />
+            {/* Channel bars */}
+            <line x1="-8" y1="-15" x2="-8" y2="-7" stroke="#38bdf8" strokeWidth="2.5" />
+            <line x1="-8" y1="-4" x2="-8" y2="4" stroke="#38bdf8" strokeWidth="2.5" />
+            <line x1="-8" y1="7" x2="-8" y2="15" stroke="#38bdf8" strokeWidth="2.5" />
+            {/* Source top */}
+            <line x1="-8" y1="-11" x2="16" y2="-11" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="-11" x2="20" y2="-30" stroke="#38bdf8" strokeWidth="2" />
+            {/* Drain bottom */}
+            <line x1="-8" y1="11" x2="16" y2="11" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="11" x2="20" y2="30" stroke="#38bdf8" strokeWidth="2" />
+            {/* Substrate arrow outward for P-channel */}
+            <line x1="-8" y1="0" x2="16" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="0" x2="16" y2="-11" stroke="#38bdf8" strokeWidth="2" />
+            <polygon points="6,0 0,-4 0,4" fill="#38bdf8" />
+            <text x="-4" y="22" textAnchor="middle" fill="#64748b" fontSize="7">PMOS</text>
+          </g>
+        );
+      }
+
+      case 'jfet_n': {
+        return (
+          <g>
+            <circle cx="0" cy="0" r="26" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+            {/* Channel line */}
+            <line x1="0" y1="-18" x2="0" y2="18" stroke="#38bdf8" strokeWidth="3" />
+            {/* Gate */}
+            <line x1="-30" y1="0" x2="0" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <polygon points="0,0 -8,-4 -8,4" fill="#38bdf8" />
+            {/* Drain & Source */}
+            <line x1="0" y1="-12" x2="20" y2="-30" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="0" y1="12" x2="20" y2="30" stroke="#38bdf8" strokeWidth="2" />
+            <text x="-4" y="22" textAnchor="middle" fill="#64748b" fontSize="7">JFET</text>
+          </g>
+        );
+      }
+
+      case 'thermistor':
+      case 'thermistor_ptc': {
+        return (
+          <g>
+            <line x1="-40" y1="0" x2="-24" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="24" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <rect x="-24" y="-10" width="48" height="20" rx="2" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+            {/* Diagonal threshold bar */}
+            <line x1="-28" y1="16" x2="-14" y2="16" stroke="#f59e0b" strokeWidth="2" />
+            <line x1="-14" y1="16" x2="26" y2="-16" stroke="#f59e0b" strokeWidth="2" />
+            <text x="18" y="-18" textAnchor="middle" fill="#f59e0b" fontSize="8" fontWeight="bold">t°</text>
+          </g>
+        );
+      }
+
+      case 'photodiode': {
+        return (
+          <g>
+            <line x1="-40" y1="0" x2="-16" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="0" x2="40" y2="0" stroke="#38bdf8" strokeWidth="2" />
+            <polygon points="-16,-14 16,0 -16,14" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+            <line x1="16" y1="-14" x2="16" y2="14" stroke="#e2e8f0" strokeWidth="3" />
+            {/* Incoming light arrows */}
+            <line x1="12" y1="-22" x2="0" y2="-12" stroke="#38bdf8" strokeWidth="1.5" />
+            <polygon points="0,-12 4,-16 6,-11" fill="#38bdf8" />
+            <line x1="20" y1="-18" x2="8" y2="-8" stroke="#38bdf8" strokeWidth="1.5" />
+            <polygon points="8,-8 12,-12 14,-7" fill="#38bdf8" />
+          </g>
+        );
+      }
+
       case 'dc_motor': {
         const isRunning = !!element.properties.isRunning;
         const rpm = element.properties.rpm || 0;

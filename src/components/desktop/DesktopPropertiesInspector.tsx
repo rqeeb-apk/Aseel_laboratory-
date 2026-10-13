@@ -443,23 +443,27 @@ export const DesktopPropertiesInspector: React.FC<DesktopPropertiesInspectorProp
 
               {/* Render Style Switcher */}
               <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[11px]">
-                <span className="text-slate-400">نمط العرض:</span>
-                <div className="flex gap-1">
+                <span className="text-slate-400 font-medium">مخطط المكونات:</span>
+                <div className="flex gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800">
                   <button
+                    type="button"
                     onClick={() => onChangeRenderStyle('schematic')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      renderStyle === 'schematic' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-slate-200'
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      renderStyle === 'schematic' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
                     }`}
+                    title="مخطط رمزي قياسي (IEC/IEEE)"
                   >
-                    مخطط
+                    📐 رمزي
                   </button>
                   <button
+                    type="button"
                     onClick={() => onChangeRenderStyle('realistic')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      renderStyle === 'realistic' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                    className={`px-2 py-0.5 rounded text-[10px] font-black transition-all ${
+                      renderStyle === 'realistic' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'
                     }`}
+                    title="مخطط فعلي واقعي للمكونات"
                   >
-                    واقعي
+                    🔌 فعلي
                   </button>
                 </div>
               </div>

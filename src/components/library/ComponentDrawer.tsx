@@ -1,11 +1,12 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Yemen Mechatronics Lab - Categorized Component Library Drawer
+ * Yemen Mechatronics Lab - Categorized Mobile Component Side Drawer
+ * مكتبة المكونات الإلكترونية المنظمة بقوائم منسدلة قابلة للطي ومثبتة على يمين الشاشة
  */
 
 import React, { useState, useMemo } from 'react';
-import { ComponentType, ComponentCategory } from '../../types/circuit';
+import { ComponentType, ComponentCategory, RenderStyle } from '../../types/circuit';
 import { COMPONENT_CATALOG, CATEGORIES_CONFIG } from '../../data/componentsCatalog';
 import {
   Search,
@@ -20,60 +21,102 @@ import {
   Share2,
   Plus,
   ChevronDown,
-  ChevronUp,
-  X,
+  Filter,
+  Box,
+  PanelRightClose,
 } from 'lucide-react';
 
 interface ComponentDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onAddComponent: (type: ComponentType) => void;
+  renderStyle?: RenderStyle;
+  onChangeRenderStyle?: (style: RenderStyle) => void;
 }
 
 export const ComponentDrawer: React.FC<ComponentDrawerProps> = ({
   isOpen,
   onClose,
   onAddComponent,
+  renderStyle = 'schematic',
+  onChangeRenderStyle,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ComponentCategory | 'all'>('all');
-  const [expandedCategory, setExpandedCategory] = useState<string | null>('power');
+
+  // Track accordion state for each category (primary requested categories open by default)
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
+    power: true,
+    passives: true,
+    semiconductors: true,
+    instruments: false,
+    switches_sensors: false,
+    logic: false,
+    ics: false,
+    outputs: false,
+    connectors: false,
+  });
+
+  const toggleCategory = (catId: string) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [catId]: !prev[catId],
+    }));
+  };
+
+  const expandAll = () => {
+    const allOpen: Record<string, boolean> = {};
+    CATEGORIES_CONFIG.forEach(c => {
+      allOpen[c.id] = true;
+    });
+    setOpenCategories(allOpen);
+  };
+
+  const collapseAll = () => {
+    const allClosed: Record<string, boolean> = {};
+    CATEGORIES_CONFIG.forEach(c => {
+      allClosed[c.id] = false;
+    });
+    setOpenCategories(allClosed);
+  };
 
   // Category Icon Map
-  const getCategoryIcon = (id: ComponentCategory) => {
+  const getCategoryIcon = (id: ComponentCategory, className = 'w-3.5 h-3.5') => {
     switch (id) {
       case 'power':
-        return <Zap className="w-4 h-4 text-amber-400" />;
+        return <Zap className={`${className} text-amber-400`} />;
       case 'passives':
-        return <Activity className="w-4 h-4 text-emerald-400" />;
-      case 'switches_sensors':
-        return <ToggleLeft className="w-4 h-4 text-sky-400" />;
+        return <Activity className={`${className} text-emerald-400`} />;
       case 'semiconductors':
-        return <Cpu className="w-4 h-4 text-indigo-400" />;
-      case 'logic':
-        return <GitBranch className="w-4 h-4 text-purple-400" />;
-      case 'ics':
-        return <Layers className="w-4 h-4 text-fuchsia-400" />;
-      case 'outputs':
-        return <Disc className="w-4 h-4 text-rose-400" />;
+        return <Cpu className={`${className} text-indigo-400`} />;
       case 'instruments':
-        return <Gauge className="w-4 h-4 text-teal-400" />;
+        return <Gauge className={`${className} text-teal-400`} />;
+      case 'switches_sensors':
+        return <ToggleLeft className={`${className} text-sky-400`} />;
+      case 'logic':
+        return <GitBranch className={`${className} text-purple-400`} />;
+      case 'ics':
+        return <Layers className={`${className} text-fuchsia-400`} />;
+      case 'outputs':
+        return <Disc className={`${className} text-rose-400`} />;
       case 'connectors':
-        return <Share2 className="w-4 h-4 text-slate-400" />;
+        return <Share2 className={`${className} text-slate-400`} />;
       default:
-        return <Zap className="w-4 h-4 text-amber-400" />;
+        return <Box className={`${className} text-amber-400`} />;
     }
   };
 
-  // Filtered components
   const allComponents = useMemo(() => Object.values(COMPONENT_CATALOG), []);
 
   const filteredComponents = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return allComponents.filter(comp => {
       const matchesSearch =
-        comp.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        comp.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        comp.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        comp.nameAr.toLowerCase().includes(q) ||
+        comp.nameEn.toLowerCase().includes(q) ||
+        comp.descriptionAr.toLowerCase().includes(q) ||
+        (comp.defaultUnit && `${comp.defaultValue} ${comp.defaultUnit}`.toLowerCase().includes(q));
 
       const matchesCat = selectedCategory === 'all' || comp.category === selectedCategory;
 
@@ -81,144 +124,256 @@ export const ComponentDrawer: React.FC<ComponentDrawerProps> = ({
     });
   }, [allComponents, searchQuery, selectedCategory]);
 
+  const groupedCategories = useMemo(() => {
+    const groups: {
+      category: typeof CATEGORIES_CONFIG[0];
+      components: typeof allComponents;
+    }[] = [];
+
+    const categoriesToShow =
+      selectedCategory === 'all'
+        ? CATEGORIES_CONFIG
+        : CATEGORIES_CONFIG.filter(c => c.id === selectedCategory);
+
+    categoriesToShow.forEach(cat => {
+      const items = filteredComponents.filter(c => c.category === cat.id);
+      if (items.length > 0 || (searchQuery === '' && selectedCategory === cat.id)) {
+        groups.push({
+          category: cat,
+          components: items,
+        });
+      }
+    });
+
+    return groups;
+  }, [filteredComponents, selectedCategory, searchQuery]);
+
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Mobile Backdrop */}
-      <div
-        className="fixed inset-0 z-35 bg-black/60 backdrop-blur-xs sm:hidden"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      <aside
-        className="fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:h-[80vh] max-sm:rounded-t-3xl max-sm:border-t max-sm:border-sky-500/30 sm:top-0 sm:right-0 sm:bottom-0 sm:w-96 z-40 bg-slate-900/95 backdrop-blur-xl sm:border-l border-slate-800 flex flex-col shadow-2xl shadow-black/90 transition-all duration-300 ease-in-out"
-        dir="rtl"
-      >
-        {/* Mobile Drag Handle */}
-        <div className="w-full pt-2.5 pb-1 flex justify-center sm:hidden" onClick={onClose}>
-          <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
-        </div>
-
-        {/* Drawer Header */}
-        <div className="flex items-center justify-between px-5 py-3 sm:py-4 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-              <Layers className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-100">مكتبة المكونات الإلكترونية</h2>
-              <p className="text-[10px] sm:text-[11px] text-slate-400">Circuit Wizard Components Library</p>
-            </div>
+    <aside
+      className="w-[180px] xs:w-[210px] sm:w-[260px] h-full bg-slate-900/98 backdrop-blur-md border-l border-slate-800 flex flex-col select-none shrink-0 z-20 shadow-xl"
+      dir="rtl"
+    >
+      {/* Header: Title + Collapse Button */}
+      <div className="p-2 sm:p-2.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-6 h-6 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
+            <Layers className="w-3.5 h-3.5" />
           </div>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="إغلاق المكتبة"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="min-w-0">
+            <h2 className="text-[11px] sm:text-xs font-bold text-white truncate flex items-center gap-1">
+              <span>المكونات</span>
+              <span className="text-[9px] px-1 py-0.2 rounded-full bg-sky-500/20 text-sky-300 font-mono font-bold">
+                {filteredComponents.length}
+              </span>
+            </h2>
+          </div>
         </div>
+
+        {/* Quick Collapse Button to maximize canvas when desired */}
+        <button
+          onClick={onClose}
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-[10px] font-semibold transition-colors"
+          title="طي لوحة المكونات لتوسيع اللوحة"
+        >
+          <PanelRightClose className="w-3.5 h-3.5" />
+          <span className="hidden xs:inline text-[10px]">طي</span>
+        </button>
+      </div>
+
+      {/* Diagram Render Style Switcher: مخطط رمزي vs مخطط فعلي */}
+      {onChangeRenderStyle && (
+        <div className="p-1.5 bg-slate-950/90 border-b border-slate-800/80 flex items-center justify-between shrink-0">
+          <span className="text-slate-400 font-bold text-[10px] hidden xs:inline">المخطط:</span>
+          <div className="flex p-0.5 bg-slate-900 rounded-lg border border-slate-800 shadow-inner w-full xs:w-auto justify-center">
+            <button
+              type="button"
+              onClick={() => onChangeRenderStyle('schematic')}
+              className={`flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-bold transition-all active:scale-95 ${
+                renderStyle === 'schematic'
+                  ? 'bg-sky-500 text-white shadow-sm ring-1 ring-sky-300/40'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="مخطط رمزي قياسي"
+            >
+              <span>📐</span>
+              <span>رمزي</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeRenderStyle('realistic')}
+              className={`flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-black transition-all active:scale-95 ${
+                renderStyle === 'realistic'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-sm ring-1 ring-amber-300/50'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="مخطط فعلي واقعي"
+            >
+              <span>🔌</span>
+              <span>فعلي</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search Input */}
-      <div className="p-3 border-b border-slate-800/80 shrink-0">
+      <div className="p-1.5 sm:p-2 border-b border-slate-800/80 shrink-0 bg-slate-900/60">
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="ابحث عن مكون (مقاومة، LED، محرك، 555...)"
-            className="w-full pr-9 pl-4 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 transition-all"
+            placeholder="بحث عن عنصر..."
+            className="w-full pr-7 pl-2 py-1 text-[11px] bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-all"
           />
-          <Search className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3 h-3 text-slate-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
       </div>
 
-      {/* Category Filter Tabs */}
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-slate-800/60 overflow-x-auto scrollbar-none shrink-0">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-2.5 py-1 text-xs rounded-lg whitespace-nowrap transition-colors ${
-            selectedCategory === 'all'
-              ? 'bg-sky-500 text-white font-semibold'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-          }`}
-        >
-          الكل ({allComponents.length})
-        </button>
-        {CATEGORIES_CONFIG.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg whitespace-nowrap transition-colors ${
-              selectedCategory === cat.id
-                ? 'bg-sky-500 text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-            }`}
+      {/* Category Dropdown Selector & Quick Expand/Collapse */}
+      <div className="p-1.5 border-b border-slate-800/80 bg-slate-950/40 space-y-1 shrink-0">
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="flex items-center gap-1 text-slate-300 font-bold">
+            <Filter className="w-3 h-3 text-sky-400" />
+            <span>الفئات:</span>
+          </span>
+          <div className="flex items-center gap-1.5 text-[9px]">
+            <button
+              type="button"
+              onClick={expandAll}
+              className="text-sky-400 hover:text-sky-300 font-bold px-1 py-0.2 rounded hover:bg-sky-500/10"
+            >
+              توسيع
+            </button>
+            <span className="text-slate-600">•</span>
+            <button
+              type="button"
+              onClick={collapseAll}
+              className="text-slate-400 hover:text-slate-200 font-medium px-1 py-0.2 rounded hover:bg-slate-800"
+            >
+              طي
+            </button>
+          </div>
+        </div>
+
+        {/* Dropdown Select to quickly switch category */}
+        <div className="relative">
+          <select
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value as any)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-200 font-semibold focus:outline-none focus:border-sky-500 cursor-pointer appearance-none pl-6"
           >
-            {getCategoryIcon(cat.id)}
-            <span>{cat.titleAr}</span>
-          </button>
-        ))}
+            <option value="all">📁 جميع الفئات ({allComponents.length})</option>
+            {CATEGORIES_CONFIG.map(cat => {
+              const count = allComponents.filter(c => c.category === cat.id).length;
+              return (
+                <option key={cat.id} value={cat.id}>
+                  {cat.titleAr} ({count})
+                </option>
+              );
+            })}
+          </select>
+          <ChevronDown className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
       </div>
 
-      {/* Component Cards List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-        {filteredComponents.length === 0 ? (
-          <div className="text-center py-12 text-slate-500 text-xs">
-            لم يتم العثور على أي مكون يطابق بحثك.
+      {/* Collapsible Dropdown Sections & Component Cards */}
+      <div className="flex-1 overflow-y-auto p-1.5 sm:p-2 space-y-1.5 scrollbar-thin">
+        {groupedCategories.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 text-[11px]">
+            لا توجد عناصر مطابقة للبحث.
           </div>
         ) : (
-          filteredComponents.map(comp => (
-            <div
-              key={comp.type}
-              className="p-3 bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800/80 hover:border-sky-500/40 rounded-xl transition-all duration-150 flex items-center justify-between gap-3 group"
-            >
-              <div className="flex items-start gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 group-hover:border-sky-500/30 transition-colors">
-                  {getCategoryIcon(comp.category)}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-bold text-slate-200 truncate">{comp.nameAr}</h3>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 text-sky-400 font-mono">
-                      {comp.pins.length} أطراف
+          groupedCategories.map(({ category, components }) => {
+            const isOpen = searchQuery.trim() !== '' || openCategories[category.id] !== false;
+
+            return (
+              <div
+                key={category.id}
+                className="rounded-xl border border-slate-800/90 bg-slate-950/80 overflow-hidden shadow-xs transition-all"
+              >
+                {/* Category Dropdown Header */}
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(category.id)}
+                  className="w-full px-2 py-1.5 bg-slate-950/90 hover:bg-slate-800/70 flex items-center justify-between text-right transition-colors border-b border-transparent data-[open=true]:border-slate-800/70"
+                  data-open={isOpen}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-5 h-5 rounded-md bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                      {getCategoryIcon(category.id, 'w-3 h-3')}
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-100 truncate">
+                      {category.titleAr}
+                    </span>
+                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-slate-800 text-sky-400 font-mono font-semibold shrink-0">
+                      {components.length}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-[11px] text-slate-400 truncate font-mono">{comp.nameEn}</p>
-                    {comp.defaultUnit && (
-                      <span className="text-[10px] text-amber-400/90 font-mono">
-                        ({comp.defaultValue} {comp.defaultUnit})
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-slate-500 line-clamp-1 mt-1">{comp.descriptionAr}</p>
-                </div>
-              </div>
 
-              {/* Add to Canvas Button */}
-              <button
-                onClick={() => onAddComponent(comp.type)}
-                className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-sky-600/20 hover:bg-sky-600 border border-sky-500/30 hover:border-sky-500 text-sky-300 hover:text-white rounded-lg text-xs font-semibold transition-all active:scale-95 min-h-[40px]"
-                title="إضافة إلى مساحة الرسم"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">إضافة</span>
-              </button>
-            </div>
-          ))
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
+                      isOpen ? 'rotate-180 text-sky-400' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown Items: Compact touch cards */}
+                {isOpen && (
+                  <div className="p-1 space-y-1 bg-slate-900/40">
+                    {components.map(comp => (
+                      <div
+                        key={comp.type}
+                        onClick={() => onAddComponent(comp.type)}
+                        className="p-1.5 bg-slate-950/85 hover:bg-slate-800/90 border border-slate-800/80 hover:border-sky-500/50 rounded-lg transition-all flex items-center justify-between gap-1.5 group cursor-pointer active:scale-[0.98]"
+                        title={comp.descriptionAr}
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-6 h-6 rounded-md bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 group-hover:border-sky-500/40 text-[11px]">
+                            {renderStyle === 'realistic' ? '🔌' : '📐'}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[11px] font-bold text-slate-200 group-hover:text-white truncate leading-tight">
+                              {comp.nameAr}
+                            </div>
+                            <div className="text-[9px] text-slate-400 truncate flex items-center gap-1 font-mono">
+                              <span className="truncate">{comp.nameEn}</span>
+                              {comp.defaultUnit && comp.defaultValue > 0 && (
+                                <span className="text-amber-400/90 font-bold shrink-0">
+                                  {comp.defaultValue}{comp.defaultUnit}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Add Button */}
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            onAddComponent(comp.type);
+                          }}
+                          className="w-5 h-5 rounded-md bg-slate-800 text-slate-300 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center shrink-0 transition-all shadow-xs"
+                          title="إضافة للوحة"
+                        >
+                          <Plus className="w-3 h-3 stroke-[2.5]" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
 
-      {/* Drawer Footer Helper */}
-      <div className="p-3 bg-slate-950 border-t border-slate-800/80 text-center shrink-0">
-        <p className="text-[11px] text-slate-400">
-          انقر على <span className="text-sky-400 font-medium">إضافة</span> لوضع المكون في وسط المختبر، ثم اسحبه بإصبعك.
-        </p>
+      {/* Mini Instructional Footer */}
+      <div className="p-1.5 border-t border-slate-800/80 bg-slate-950/70 text-[9px] text-slate-400 text-center shrink-0">
+        انقر لإضافة المكون مباشرة للوحة
       </div>
     </aside>
-  </>
-);
+  );
 };

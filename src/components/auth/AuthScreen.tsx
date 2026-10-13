@@ -191,21 +191,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
     }
   };
 
-  // Quick Demo Login for instant review of fully activated lab
-  const handleQuickDemoLogin = async () => {
-    setLoginPhone('777000111');
-    setLoginPassword('password123');
-    setLoginLoading(true);
-    setLoginError(null);
-    try {
-      const res = await authService.login('777000111', 'password123');
-      onStudentSuccess(res.user);
-    } catch (err: any) {
-      setLoginError(err.message || 'تعذر تسجيل الدخول بالحساب التجريبي');
-    } finally {
-      setLoginLoading(false);
-    }
-  };
+
 
   return (
     <div
@@ -438,18 +424,7 @@ export function AuthScreen({ onStudentSuccess, onOwnerSuccess }: AuthScreenProps
                     )}
                   </button>
 
-                  {/* Fast Testing Demo Account Button */}
-                  <div className="pt-2 border-t border-slate-800/80">
-                    <button
-                      type="button"
-                      onClick={handleQuickDemoLogin}
-                      disabled={loginLoading}
-                      className="w-full py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 border border-cyan-500/30 hover:border-cyan-500/60 text-cyan-300 hover:text-cyan-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>تجربة فورية بحساب مفعل مسبقاً (777000111)</span>
-                    </button>
-                  </div>
+
 
                   <div className="pt-1 text-center text-xs text-slate-400">
                     <span>ليس لديك حساب بعد؟ </span>

@@ -138,31 +138,33 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
-        {/* Schematic vs Realistic View Toggle (Mandatory Requirement) */}
-        <div className="hidden xs:flex items-center p-0.5 bg-slate-950 border border-slate-800 rounded-xl shrink-0">
+        {/* Schematic vs Realistic View Toggle (Always Visible & Accessible) */}
+        <div className="flex items-center p-0.5 bg-slate-950/90 border border-slate-800 rounded-xl shrink-0 shadow-inner">
           <button
             onClick={() => onChangeRenderStyle('schematic')}
-            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-lg transition-all ${
+            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-lg transition-all active:scale-95 ${
               renderStyle === 'schematic'
-                ? 'bg-sky-500 text-white font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-sky-500 text-white font-black shadow-md shadow-sky-500/25 ring-1 ring-sky-300/40'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
             }`}
-            title="مخطط رمزي قياسي (Schematic Symbols)"
+            title="تفعيل المخطط الرمزي القياسي (Standard IEC/IEEE Schematic)"
           >
-            <span className="sm:hidden">مخطط</span>
-            <span className="hidden sm:inline">مخطط رمزي</span>
+            <span className="text-xs">📐</span>
+            <span className="xs:hidden">رمزي</span>
+            <span className="hidden xs:inline">مخطط رمزي</span>
           </button>
           <button
             onClick={() => onChangeRenderStyle('realistic')}
-            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-lg transition-all ${
+            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-lg transition-all active:scale-95 ${
               renderStyle === 'realistic'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-md shadow-amber-500/25 ring-1 ring-amber-300/50'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
             }`}
-            title="شكل واقعي حقيقي للمكونات (Realistic Physical View)"
+            title="تفعيل المخطط الفعلي الواقعي للمكونات (Realistic Physical Components)"
           >
-            <span className="sm:hidden">واقعي</span>
-            <span className="hidden sm:inline">شكل واقعي</span>
+            <span className="text-xs">🔌</span>
+            <span className="xs:hidden">فعلي</span>
+            <span className="hidden xs:inline">مخطط فعلي</span>
           </button>
         </div>
 
@@ -409,6 +411,51 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 >
                   <Monitor className="w-3.5 h-3.5" />
                   <span>كمبيوتر 🖥️</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Schematic vs Realistic View Toggle in Mobile Drawer */}
+            <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <span className="text-sm">📐</span>
+                  <span>مخطط المكونات (رمزي / فعلي):</span>
+                </span>
+                <span className="text-[10px] text-sky-400 font-bold">
+                  {renderStyle === 'schematic' ? 'مخطط رمزي 📐' : 'مخطط فعلي 🔌'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeRenderStyle('schematic');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`py-2 px-2 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${
+                    renderStyle === 'schematic'
+                      ? 'bg-sky-500 text-white shadow-md'
+                      : 'bg-slate-900 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>📐</span>
+                  <span>مخطط رمزي</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeRenderStyle('realistic');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`py-2 px-2 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all ${
+                    renderStyle === 'realistic'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md font-black'
+                      : 'bg-slate-900 text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>🔌</span>
+                  <span>مخطط فعلي</span>
                 </button>
               </div>
             </div>

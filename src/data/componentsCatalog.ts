@@ -1273,15 +1273,15 @@ export const CATEGORIES_CONFIG: {
   titleAr: string;
   titleEn: string;
 }[] = [
-  { id: 'power', titleAr: 'البطاريات ومصادر الطاقة', titleEn: 'Power Supplies & Batteries' },
-  { id: 'passives', titleAr: 'المقاومات والمكثفات والملفات', titleEn: 'Resistors, Caps & Inductors' },
-  { id: 'switches_sensors', titleAr: 'المفاتيح والحساسات', titleEn: 'Switches & Sensors' },
-  { id: 'semiconductors', titleAr: 'الدايودات والترانزستورات', titleEn: 'Semiconductors & Diodes' },
-  { id: 'logic', titleAr: 'البوابات المنطقية', titleEn: 'Logic Gates' },
-  { id: 'ics', titleAr: 'الدوائر المتكاملة (555، LM741)', titleEn: 'Integrated Circuits (ICs)' },
-  { id: 'outputs', titleAr: 'المشغلات والمحركات والمخرجات', titleEn: 'Actuators & Outputs' },
-  { id: 'instruments', titleAr: 'أجهزة القياس والاختبار', titleEn: 'Measuring Instruments' },
-  { id: 'connectors', titleAr: 'الموصلات ونقاط التفرع', titleEn: 'Connectors & Nodes' },
+  { id: 'power', titleAr: 'مصادر طاقة', titleEn: 'Power Sources' },
+  { id: 'passives', titleAr: 'عناصر سلبية', titleEn: 'Passive Components' },
+  { id: 'semiconductors', titleAr: 'أشباه موصلات', titleEn: 'Semiconductors' },
+  { id: 'instruments', titleAr: 'أدوات قياس', titleEn: 'Measuring Instruments' },
+  { id: 'switches_sensors', titleAr: 'مفاتيح وحساسات', titleEn: 'Switches & Sensors' },
+  { id: 'logic', titleAr: 'بوابات منطقية', titleEn: 'Logic Gates' },
+  { id: 'ics', titleAr: 'دوائر متكاملة', titleEn: 'Integrated Circuits (ICs)' },
+  { id: 'outputs', titleAr: 'مشغلات ومخرجات', titleEn: 'Actuators & Outputs' },
+  { id: 'connectors', titleAr: 'موصلات وتوصيلات', titleEn: 'Connectors & Nodes' },
 ];
 
 /**

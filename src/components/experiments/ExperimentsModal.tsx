@@ -253,9 +253,6 @@ export const ExperimentsModal: React.FC<ExperimentsModalProps> = ({
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs leading-relaxed">{step.instruction}</p>
-                          <p className="text-[11px] text-sky-400/80 mt-1">
-                            💡 تلميح: {step.verificationTip}
-                          </p>
                         </div>
                       </div>
                     );

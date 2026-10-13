@@ -751,6 +751,284 @@ export const RealisticComponentGraphic: React.FC<RealisticProps> = ({ element, s
       );
     }
 
+    // ------------------------------------
+    // ADDITIONAL REALISTIC MECHATRONICS COMPONENTS
+    // ------------------------------------
+    case 'battery_lipo': {
+      const v = element.properties.voltage ?? element.value ?? 3.7;
+      return (
+        <g>
+          {/* Silver aluminum foil pouch cell */}
+          <rect x="-32" y="-22" width="64" height="44" rx="4" fill="#64748b" stroke="#94a3b8" strokeWidth="1.5" />
+          <rect x="-30" y="-20" width="60" height="40" rx="3" fill="#475569" />
+          {/* Yellow Kapton insulation tape header */}
+          <rect x="18" y="-18" width="12" height="36" rx="2" fill="#d97706" opacity="0.85" />
+          {/* Stamped specs */}
+          <text x="-4" y="-4" textAnchor="middle" fill="#f8fafc" fontSize="9" fontWeight="bold">LiPo 1S</text>
+          <text x="-4" y="8" textAnchor="middle" fill="#38bdf8" fontSize="8" fontFamily="IBM Plex Mono">{v}V 1200mAh</text>
+          {/* Positive red lead & Negative black lead */}
+          <line x1="30" y1="-15" x2="40" y2="-15" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+          <line x1="30" y1="15" x2="40" y2="15" stroke="#020617" strokeWidth="3" strokeLinecap="round" />
+        </g>
+      );
+    }
+
+    case 'bench_power_supply': {
+      const v = element.properties.voltage ?? element.value ?? 12;
+      return (
+        <g>
+          {/* Metal bench housing */}
+          <rect x="-38" y="-28" width="76" height="56" rx="5" fill="#1e293b" stroke="#475569" strokeWidth="2" />
+          {/* Dual LED display window */}
+          <rect x="-30" y="-22" width="36" height="18" rx="2" fill="#020617" stroke="#334155" strokeWidth="1" />
+          <text x="-12" y="-10" textAnchor="middle" fill="#ef4444" fontSize="10" fontFamily="IBM Plex Mono" fontWeight="bold">
+            {Number(v).toFixed(1)}V
+          </text>
+          {/* Rotary control knob */}
+          <circle cx="20" cy="-13" r="8" fill="#334155" stroke="#64748b" strokeWidth="1.5" />
+          <line x1="20" y1="-21" x2="20" y2="-15" stroke="#38bdf8" strokeWidth="2" />
+          {/* Banana Binding Posts: Red (+), Black (-), Green (GND) */}
+          <circle cx="36" cy="15" r="5" fill="#ef4444" stroke="#b91c1c" strokeWidth="1.5" />
+          <circle cx="36" cy="-15" r="5" fill="#020617" stroke="#334155" strokeWidth="1.5" />
+          <circle cx="0" cy="26" r="4.5" fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+          <text x="-14" y="14" textAnchor="middle" fill="#94a3b8" fontSize="7" fontWeight="bold">DC SUPPLY</text>
+        </g>
+      );
+    }
+
+    case 'ac_source': {
+      const v = element.properties.amplitude ?? element.value ?? 12;
+      return (
+        <g>
+          {/* Heavy-duty molded casing */}
+          <rect x="-34" y="-24" width="68" height="48" rx="6" fill="#0f172a" stroke="#0284c7" strokeWidth="2" />
+          <circle cx="0" cy="-4" r="14" fill="#020617" stroke="#38bdf8" strokeWidth="1.5" />
+          <path d="M -8 -4 Q -4 -12 0 -4 Q 4 4 8 -4" fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
+          <text x="0" y="18" textAnchor="middle" fill="#38bdf8" fontSize="9" fontWeight="bold" fontFamily="IBM Plex Mono">{v}V AC 50Hz</text>
+          {/* Binding posts */}
+          <circle cx="-34" cy="0" r="4.5" fill="#64748b" stroke="#cbd5e1" strokeWidth="1.5" />
+          <circle cx="34" cy="0" r="4.5" fill="#64748b" stroke="#cbd5e1" strokeWidth="1.5" />
+        </g>
+      );
+    }
+
+    case 'current_source': {
+      const i = element.properties.currentA ? (element.properties.currentA * 1000).toFixed(0) : element.value;
+      return (
+        <g>
+          <rect x="-34" y="-24" width="68" height="48" rx="6" fill="#0f172a" stroke="#10b981" strokeWidth="2" />
+          <rect x="-22" y="-16" width="44" height="18" rx="3" fill="#020617" stroke="#059669" strokeWidth="1" />
+          <text x="0" y="-3" textAnchor="middle" fill="#10b981" fontSize="11" fontFamily="IBM Plex Mono" fontWeight="bold">{i} mA</text>
+          <text x="0" y="16" textAnchor="middle" fill="#6ee7b7" fontSize="8" fontWeight="bold">CONST CURRENT</text>
+          <circle cx="-34" cy="0" r="4" fill="#020617" stroke="#334155" strokeWidth="1.5" />
+          <circle cx="34" cy="0" r="4" fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+        </g>
+      );
+    }
+
+    case 'transformer': {
+      return (
+        <g>
+          {/* Laminated iron EI core frame */}
+          <rect x="-32" y="-24" width="64" height="48" rx="3" fill="#334155" stroke="#475569" strokeWidth="2" />
+          {/* Core laminations lines */}
+          <line x1="-32" y1="-14" x2="32" y2="-14" stroke="#1e293b" strokeWidth="1" />
+          <line x1="-32" y1="14" x2="32" y2="14" stroke="#1e293b" strokeWidth="1" />
+          {/* Dual copper winding bobbins */}
+          <rect x="-24" y="-18" width="20" height="36" rx="2" fill="#b45309" stroke="#d97706" strokeWidth="1.5" />
+          <rect x="4" y="-18" width="20" height="36" rx="2" fill="#b45309" stroke="#d97706" strokeWidth="1.5" />
+          <text x="-14" y="3" textAnchor="middle" fill="#fef3c7" fontSize="7" fontWeight="bold">PRI</text>
+          <text x="14" y="3" textAnchor="middle" fill="#fef3c7" fontSize="7" fontWeight="bold">SEC</text>
+          {/* Terminal tags */}
+          <line x1="-32" y1="-15" x2="-40" y2="-15" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="-32" y1="15" x2="-40" y2="15" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="32" y1="-15" x2="40" y2="-15" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="32" y1="15" x2="40" y2="15" stroke="#cbd5e1" strokeWidth="2" />
+        </g>
+      );
+    }
+
+    case 'switch_spdt': {
+      const pos = element.properties.position === 2 ? 2 : 1;
+      return (
+        <g>
+          {/* Miniature toggle switch body */}
+          <rect x="-28" y="-18" width="56" height="36" rx="4" fill="#0284c7" stroke="#0369a1" strokeWidth="2" />
+          {/* Threaded metal bushing & hex nut */}
+          <circle cx="0" cy="0" r="10" fill="#94a3b8" stroke="#cbd5e1" strokeWidth="1.5" />
+          <circle cx="0" cy="0" r="5" fill="#64748b" />
+          {/* Chrome metal bat lever (tilted according to position) */}
+          <line
+            x1="0"
+            y1="0"
+            x2={pos === 1 ? 16 : 16}
+            y2={pos === 1 ? -12 : 12}
+            stroke="#f8fafc"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          <circle cx={16} cy={pos === 1 ? -12 : 12} r="4" fill="#cbd5e1" stroke="#f8fafc" strokeWidth="1" />
+          {/* Solder lugs: COM at left (-40, 0), Pin 1 & 2 at right (40, -15 / 40, 15) */}
+          <line x1="-28" y1="0" x2="-40" y2="0" stroke="#cbd5e1" strokeWidth="2.5" />
+          <line x1="28" y1="-15" x2="40" y2="-15" stroke="#cbd5e1" strokeWidth="2.5" />
+          <line x1="28" y1="15" x2="40" y2="15" stroke="#cbd5e1" strokeWidth="2.5" />
+        </g>
+      );
+    }
+
+    case 'switch_dpdt': {
+      return (
+        <g>
+          <rect x="-30" y="-24" width="60" height="48" rx="4" fill="#0f172a" stroke="#334155" strokeWidth="2" />
+          <rect x="-22" y="-18" width="44" height="36" rx="3" fill="#0284c7" />
+          <circle cx="0" cy="0" r="8" fill="#94a3b8" stroke="#cbd5e1" strokeWidth="1.5" />
+          {/* Toggle lever */}
+          <line x1="0" y1="0" x2="14" y2="-10" stroke="#f8fafc" strokeWidth="4" strokeLinecap="round" />
+          {/* 6 Solder terminals */}
+          <line x1="-30" y1="-15" x2="-40" y2="-15" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="-30" y1="15" x2="-40" y2="15" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="30" y1="-25" x2="40" y2="-25" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="30" y1="-5" x2="40" y2="-5" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="30" y1="5" x2="40" y2="5" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="30" y1="25" x2="40" y2="25" stroke="#cbd5e1" strokeWidth="2" />
+        </g>
+      );
+    }
+
+    case 'mosfet_n':
+    case 'mosfet_p': {
+      const isP = element.type === 'mosfet_p';
+      return (
+        <g>
+          {/* TO-220 Power MOSFET package */}
+          <rect x="-16" y="-24" width="32" height="12" rx="2" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          <circle cx="0" cy="-18" r="3.5" fill="#0f172a" />
+          {/* Black molded epoxy case */}
+          <rect x="-16" y="-12" width="32" height="24" rx="2" fill="#020617" stroke="#334155" strokeWidth="1.5" />
+          <text x="0" y="2" textAnchor="middle" fill="#f8fafc" fontSize="7" fontWeight="bold">
+            {isP ? 'IRF9540' : 'IRF540N'}
+          </text>
+          <text x="0" y="9" textAnchor="middle" fill="#38bdf8" fontSize="6">
+            {isP ? 'P-MOS' : 'N-MOS'}
+          </text>
+          {/* 3 Leads: Gate (-30, 0), Drain (20, -30 or 20, 30), Source */}
+          <line x1="-16" y1="0" x2="-30" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="10" y1="-12" x2="20" y2="-30" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="10" y1="12" x2="20" y2="30" stroke="#cbd5e1" strokeWidth="2" />
+        </g>
+      );
+    }
+
+    case 'jfet_n': {
+      return (
+        <g>
+          {/* TO-92 Transistor Package */}
+          <path d="M -14 10 A 14 14 0 0 1 14 10 Z" fill="#090d16" stroke="#334155" strokeWidth="1.5" />
+          <rect x="-14" y="10" width="28" height="4" fill="#090d16" stroke="#334155" strokeWidth="1.5" />
+          <text x="0" y="4" textAnchor="middle" fill="#e2e8f0" fontSize="6" fontWeight="bold">2N5457</text>
+          {/* Leads */}
+          <line x1="-10" y1="14" x2="-30" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="0" y1="14" x2="20" y2="-30" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="10" y1="14" x2="20" y2="30" stroke="#cbd5e1" strokeWidth="2" />
+        </g>
+      );
+    }
+
+    case 'stepper_motor': {
+      return (
+        <g>
+          {/* NEMA 17 Stepper Body */}
+          <rect x="-30" y="-26" width="60" height="52" rx="4" fill="#1e293b" stroke="#475569" strokeWidth="2" />
+          {/* 4 corner mounting bolt holes */}
+          <circle cx="-22" cy="-18" r="2.5" fill="#020617" stroke="#64748b" strokeWidth="1" />
+          <circle cx="22" cy="-18" r="2.5" fill="#020617" stroke="#64748b" strokeWidth="1" />
+          <circle cx="-22" cy="18" r="2.5" fill="#020617" stroke="#64748b" strokeWidth="1" />
+          <circle cx="22" cy="18" r="2.5" fill="#020617" stroke="#64748b" strokeWidth="1" />
+          {/* Centered machined aluminum front collar & D-shaft */}
+          <circle cx="0" cy="0" r="16" fill="#334155" stroke="#64748b" strokeWidth="1.5" />
+          <circle cx="0" cy="0" r="6" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+          <text x="0" y="20" textAnchor="middle" fill="#818cf8" fontSize="7" fontWeight="bold">NEMA-17</text>
+          {/* 4 Bipolar lead wires */}
+          <line x1="-30" y1="-20" x2="-40" y2="-20" stroke="#ef4444" strokeWidth="2.5" />
+          <line x1="-30" y1="-5" x2="-40" y2="-5" stroke="#3b82f6" strokeWidth="2.5" />
+          <line x1="30" y1="-20" x2="40" y2="-20" stroke="#10b981" strokeWidth="2.5" />
+          <line x1="30" y1="-5" x2="40" y2="-5" stroke="#020617" strokeWidth="2.5" />
+        </g>
+      );
+    }
+
+    case 'thermistor':
+    case 'thermistor_ptc': {
+      const isPTC = element.type === 'thermistor_ptc';
+      return (
+        <g>
+          {/* Leads */}
+          <line x1="-40" y1="0" x2="-14" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="14" y1="0" x2="40" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          {/* Epoxy coated bead */}
+          <circle cx="0" cy="0" r="14" fill={isPTC ? '#eab308' : '#0284c7'} stroke={isPTC ? '#ca8a04' : '#0369a1'} strokeWidth="1.5" />
+          <text x="0" y="3" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">
+            {isPTC ? 'PTC' : 'NTC'}
+          </text>
+        </g>
+      );
+    }
+
+    case 'photodiode': {
+      return (
+        <g>
+          <line x1="-40" y1="0" x2="-14" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="14" y1="0" x2="40" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          {/* Tinted lens housing with active semiconductor die */}
+          <rect x="-14" y="-12" width="28" height="24" rx="5" fill="#020617" stroke="#3b82f6" strokeWidth="1.5" />
+          <rect x="-8" y="-6" width="16" height="12" fill="#1e3a8a" />
+          {/* Silicon chip grid lines */}
+          <line x1="-4" y1="-6" x2="-4" y2="6" stroke="#60a5fa" strokeWidth="0.8" />
+          <line x1="4" y1="-6" x2="4" y2="6" stroke="#60a5fa" strokeWidth="0.8" />
+        </g>
+      );
+    }
+
+    case 'capacitor_film': {
+      return (
+        <g>
+          <line x1="-35" y1="0" x2="-18" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="18" y1="0" x2="35" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          {/* Rectangular box polyester film capacitor (yellow/orange box) */}
+          <rect x="-18" y="-16" width="36" height="32" rx="2" fill="#f59e0b" stroke="#d97706" strokeWidth="1.5" />
+          <text x="0" y="2" textAnchor="middle" fill="#78350f" fontSize="7" fontWeight="bold">100nF</text>
+          <text x="0" y="10" textAnchor="middle" fill="#78350f" fontSize="6">100V</text>
+        </g>
+      );
+    }
+
+    case 'capacitor_super': {
+      return (
+        <g>
+          <line x1="-35" y1="0" x2="-18" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          <line x1="18" y1="0" x2="35" y2="0" stroke="#cbd5e1" strokeWidth="2" />
+          {/* Blue coin / radial supercapacitor */}
+          <circle cx="0" cy="0" r="18" fill="#1d4ed8" stroke="#1e40af" strokeWidth="2" />
+          <circle cx="0" cy="0" r="14" fill="#2563eb" />
+          <text x="0" y="2" textAnchor="middle" fill="#f8fafc" fontSize="8" fontWeight="bold">5.5V</text>
+          <text x="0" y="10" textAnchor="middle" fill="#93c5fd" fontSize="7">1.0F</text>
+        </g>
+      );
+    }
+
+    case 'resistor_shunt': {
+      return (
+        <g>
+          <line x1="-40" y1="0" x2="-22" y2="0" stroke="#cbd5e1" strokeWidth="3" />
+          <line x1="22" y1="0" x2="40" y2="0" stroke="#cbd5e1" strokeWidth="3" />
+          {/* Heavy white ceramic block shunt */}
+          <rect x="-22" y="-12" width="44" height="24" rx="2" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="0" y="0" textAnchor="middle" fill="#0f172a" fontSize="8" fontWeight="bold">0.1Ω 5W</text>
+          <text x="0" y="8" textAnchor="middle" fill="#64748b" fontSize="6">SHUNT</text>
+        </g>
+      );
+    }
+
     // Default mechatronics module packaging (never returns null!)
     default: {
       const meta = COMPONENT_CATALOG[element.type];
