@@ -76,6 +76,10 @@ export function OwnerDashboardModal({
   // Alert/action state
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
+  // Requests section filters
+  const [requestsFilter, setRequestsFilter] = useState<'pending' | 'active' | 'rejected' | 'suspended' | 'all'>('pending');
+  const [requestsSearch, setRequestsSearch] = useState('');
+
   // Fetch initial data
   const loadAllData = async () => {
     setLoadingStats(true);
@@ -215,9 +219,35 @@ export function OwnerDashboardModal({
 
   if (!isOpen) return null;
 
-  const pendingRequests = students.filter(
+  const pendingCount = students.filter(
     s => s.subscriptionStatus === 'pending_verification' || s.subscriptionStatus === 'pending_subscription'
-  );
+  ).length;
+  const activeCount = students.filter(s => s.subscriptionStatus === 'active').length;
+  const rejectedCount = students.filter(s => s.subscriptionStatus === 'rejected').length;
+  const suspendedCount = students.filter(s => s.subscriptionStatus === 'suspended').length;
+
+  const filteredRequests = students.filter(s => {
+    if (requestsSearch.trim()) {
+      const q = requestsSearch.trim().toLowerCase();
+      const matchName = (s.fullName || '').toLowerCase().includes(q);
+      const matchPhone = (s.phone || '').includes(q);
+      const matchEmail = (s.email || '').toLowerCase().includes(q);
+      if (!matchName && !matchPhone && !matchEmail) return false;
+    }
+    if (requestsFilter === 'pending') {
+      return s.subscriptionStatus === 'pending_verification' || s.subscriptionStatus === 'pending_subscription';
+    }
+    if (requestsFilter === 'active') {
+      return s.subscriptionStatus === 'active';
+    }
+    if (requestsFilter === 'rejected') {
+      return s.subscriptionStatus === 'rejected';
+    }
+    if (requestsFilter === 'suspended') {
+      return s.subscriptionStatus === 'suspended';
+    }
+    return true;
+  });
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
@@ -325,10 +355,10 @@ export function OwnerDashboardModal({
             }`}
           >
             <Clock className="w-4 h-4" />
-            <span>طلبات التحقق والاشتراك الجديدة</span>
-            {pendingRequests.length > 0 && (
+            <span>طلبات الاشتراك</span>
+            {pendingCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500 text-black font-extrabold">
-                {pendingRequests.length}
+                {pendingCount}
               </span>
             )}
           </button>
@@ -372,92 +402,242 @@ export function OwnerDashboardModal({
 
         {/* Tab Content Body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* TAB 1: PENDING REQUESTS */}
+          {/* TAB 1: SUBSCRIPTION REQUESTS & APPROVAL */}
           {activeTab === 'requests' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-slate-400 pb-1">
-                <span>الطلبات التي تحتاج موافقة وتفعيل من قِبل المالك:</span>
-                <span>{pendingRequests.length} طلب</span>
+            <div className="space-y-3.5">
+              {/* Header and Search bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-800">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span>قسم طلبات الاشتراك وتفعيل الحسابات</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    مراجعة بيانات المشتركين وتفعيل حساباتهم يدوياً للسماح لهم بدخول المختبر
+                  </p>
+                </div>
+
+                {/* Search input */}
+                <div className="relative w-full sm:w-64">
+                  <input
+                    type="text"
+                    value={requestsSearch}
+                    onChange={e => setRequestsSearch(e.target.value)}
+                    placeholder="بحث بالاسم أو رقم الهاتف..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 pr-8 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  />
+                  <Search className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-2.5 pointer-events-none" />
+                </div>
               </div>
 
-              {pendingRequests.length === 0 ? (
+              {/* Status Filter Buttons */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setRequestsFilter('pending')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    requestsFilter === 'pending'
+                      ? 'bg-amber-500 text-black shadow-sm'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <span>بانتظار الموافقة</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${requestsFilter === 'pending' ? 'bg-black/20 text-black' : 'bg-slate-800 text-amber-400'}`}>
+                    {pendingCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestsFilter('active')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    requestsFilter === 'active'
+                      ? 'bg-emerald-500 text-black shadow-sm'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <span>الحسابات المفعّلة</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${requestsFilter === 'active' ? 'bg-black/20 text-black' : 'bg-slate-800 text-emerald-400'}`}>
+                    {activeCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestsFilter('rejected')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    requestsFilter === 'rejected'
+                      ? 'bg-rose-500 text-white shadow-sm'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <span>الحسابات المرفوضة</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${requestsFilter === 'rejected' ? 'bg-white/20 text-white' : 'bg-slate-800 text-rose-400'}`}>
+                    {rejectedCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestsFilter('suspended')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    requestsFilter === 'suspended'
+                      ? 'bg-amber-700 text-white shadow-sm'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <span>الحسابات الموقوفة</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${requestsFilter === 'suspended' ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'}`}>
+                    {suspendedCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRequestsFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    requestsFilter === 'all'
+                      ? 'bg-cyan-600 text-white shadow-sm'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  <span>عرض الكل</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${requestsFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-800 text-cyan-400'}`}>
+                    {students.length}
+                  </span>
+                </button>
+              </div>
+
+              {/* Requests List */}
+              {filteredRequests.length === 0 ? (
                 <div className="text-center py-12 bg-slate-950/40 rounded-xl border border-slate-800">
                   <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-2 opacity-60" />
-                  <p className="text-sm font-semibold text-slate-300">لا توجد طلبات معلقة حالياً</p>
-                  <p className="text-xs text-slate-500 mt-1">جميع طلبات الطلاب تم البت فيها</p>
+                  <p className="text-sm font-semibold text-slate-300">لا توجد حسابات مطابقة لهذا الفلتر</p>
+                  <p className="text-xs text-slate-500 mt-1">اختر فلتراً آخر أو غيّر عبارة البحث</p>
                 </div>
               ) : (
-                pendingRequests.map(student => (
-                  <div
-                    key={student.id}
-                    className="p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-bold text-white">{student.fullName}</span>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            student.subscriptionStatus === 'pending_verification'
-                              ? 'bg-amber-950 text-amber-300 border border-amber-800'
-                              : 'bg-blue-950 text-cyan-300 border border-blue-800'
-                          }`}
+                filteredRequests.map(student => {
+                  const isPending =
+                    student.subscriptionStatus === 'pending_verification' ||
+                    student.subscriptionStatus === 'pending_subscription';
+                  const isActive = student.subscriptionStatus === 'active';
+                  const isRejected = student.subscriptionStatus === 'rejected';
+                  const isSuspended = student.subscriptionStatus === 'suspended';
+
+                  return (
+                    <div
+                      key={student.id}
+                      className="p-3.5 sm:p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                    >
+                      {/* Left side: Student Data */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-extrabold text-white">{student.fullName}</span>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                              isActive
+                                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+                                : isPending
+                                ? 'bg-amber-950/80 text-amber-300 border-amber-700/60 animate-pulse'
+                                : isRejected
+                                ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+                                : 'bg-slate-800 text-slate-300 border-slate-700'
+                            }`}
+                          >
+                            {isActive
+                              ? 'حساب مفعّل'
+                              : isPending
+                              ? 'بانتظار موافقة المالك'
+                              : isRejected
+                              ? 'طلب مرفوض'
+                              : 'حساب موقوف'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 sm:gap-5 text-slate-400 flex-wrap">
+                          <span className="font-mono text-cyan-300 flex items-center gap-1">
+                            <Phone className="w-3.5 h-3.5 text-slate-500" />
+                            {student.phone}
+                          </span>
+                          {student.email && (
+                            <span className="font-mono text-slate-400 flex items-center gap-1">
+                              <span className="text-slate-500">@</span>
+                              {student.email}
+                            </span>
+                          )}
+                          <span className="text-slate-500">
+                            تاريخ الإنشاء: {student.createdAt ? new Date(student.createdAt).toLocaleDateString('ar-YE', { year: 'numeric', month: 'numeric', day: 'numeric' }) : '-'}
+                          </span>
+                          {student.subscriptionExpiresAt && isActive && (
+                            <span className="text-emerald-400/90">
+                              صالح حتى: {new Date(student.subscriptionExpiresAt).toLocaleDateString('ar-YE')}
+                            </span>
+                          )}
+                        </div>
+
+                        {student.ownerNotes && (
+                          <p className="text-[11px] text-amber-300/90 mt-1">
+                            ملاحظة المالك: {student.ownerNotes}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Right side: The 3 Explicit Action Buttons */}
+                      <div className="flex items-center gap-2 flex-wrap shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/80">
+                        {/* 1. تفعيل الحساب */}
+                        <button
+                          onClick={() => handleUpdateStatus(student.id, 'active', 12)}
+                          className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95"
+                          title="تفعيل الحساب والسماح للطالب باستخدام المختبر فوراً"
                         >
-                          {student.subscriptionStatus === 'pending_verification'
-                            ? 'بانتظار التحقق من عضوية الأكاديمية'
-                            : 'بانتظار الاشتراك'}
-                        </span>
+                          <CheckCircle className="w-4 h-4" />
+                          <span>تفعيل الحساب</span>
+                        </button>
+
+                        {/* 2. رفض الطلب */}
+                        <button
+                          onClick={() => handleUpdateStatus(student.id, 'rejected')}
+                          className="px-3 py-2 rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800/80 font-bold flex items-center gap-1.5 active:scale-95"
+                          title="رفض طلب الاشتراك"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>رفض الطلب</span>
+                        </button>
+
+                        {/* 3. إيقاف الحساب */}
+                        <button
+                          onClick={() => handleUpdateStatus(student.id, 'suspended')}
+                          className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-amber-300 border border-slate-700 font-bold flex items-center gap-1.5 active:scale-95"
+                          title="إيقاف الحساب وتعليق صلاحية المختبر"
+                        >
+                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                          <span>إيقاف الحساب</span>
+                        </button>
+
+                        {/* Edit Note */}
+                        <button
+                          onClick={() => {
+                            setEditingNotesUser(student);
+                            setNoteText(student.ownerNotes || '');
+                          }}
+                          className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800"
+                          title="إضافة ملاحظة على الحساب"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Delete account */}
+                        <button
+                          onClick={() => handleDeleteStudent(student.id, student.fullName)}
+                          className="p-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-900/40"
+                          title="حذف الحساب نهائياً"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-slate-400">
-                        <span className="font-mono text-cyan-400 flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          {student.phone}
-                        </span>
-                        <span className="text-slate-500">
-                          مسجل في: {student.createdAt ? new Date(student.createdAt).toLocaleDateString('ar-YE') : '-'}
-                        </span>
-                      </div>
-                      {student.ownerNotes && (
-                        <p className="text-xs text-amber-400/90 mt-1">ملاحظة: {student.ownerNotes}</p>
-                      )}
                     </div>
-
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => handleUpdateStatus(student.id, 'active', 12)}
-                        className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>قبول وتفعيل (سنة)</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleUpdateStatus(student.id, 'active', 1)}
-                        className="px-2.5 py-2 rounded-xl bg-teal-800 hover:bg-teal-700 text-white text-xs font-semibold flex items-center gap-1"
-                      >
-                        <span>تفعيل (شهر)</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleUpdateStatus(student.id, 'rejected')}
-                        className="px-2.5 py-2 rounded-xl bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-semibold"
-                      >
-                        <span>رفض</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setEditingNotesUser(student);
-                          setNoteText(student.ownerNotes || '');
-                        }}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
-                        title="إضافة ملاحظة"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           )}
@@ -548,21 +728,36 @@ export function OwnerDashboardModal({
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {st.subscriptionStatus !== 'active' ? (
-                        <button
-                          onClick={() => handleUpdateStatus(st.id, 'active', 12)}
-                          className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold"
-                        >
-                          تفعيل (سنة)
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleUpdateStatus(st.id, 'suspended')}
-                          className="px-2.5 py-1.5 bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 rounded-lg font-medium"
-                        >
-                          إيقاف مؤقت
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleUpdateStatus(st.id, 'active', 12)}
+                        className={`px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 ${
+                          st.subscriptionStatus === 'active'
+                            ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                        }`}
+                        title="تفعيل الحساب للسماح باستخدام المختبر"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span>{st.subscriptionStatus === 'active' ? 'تمديد سنة' : 'تفعيل الحساب'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleUpdateStatus(st.id, 'rejected')}
+                        className="px-2.5 py-1.5 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-lg font-medium flex items-center gap-1"
+                        title="رفض الطلب"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>رفض الطلب</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleUpdateStatus(st.id, 'suspended')}
+                        className="px-2.5 py-1.5 bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 rounded-lg font-medium flex items-center gap-1"
+                        title="إيقاف الحساب وتعليق الصلاحية"
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                        <span>إيقاف الحساب</span>
+                      </button>
 
                       <button
                         onClick={() => {

@@ -23,9 +23,27 @@ const DEFAULT_OWNER_USER: OwnerUser = {
   isOwner: true,
 };
 
+function convertArabicNumerals(str: string): string {
+  if (!str) return '';
+  return String(str)
+    .replace(/[٠۰]/g, '0')
+    .replace(/[١۱]/g, '1')
+    .replace(/[٢۲]/g, '2')
+    .replace(/[٣۳]/g, '3')
+    .replace(/[٤۴]/g, '4')
+    .replace(/[٥۵]/g, '5')
+    .replace(/[٦۶]/g, '6')
+    .replace(/[٧۷]/g, '7')
+    .replace(/[٨۸]/g, '8')
+    .replace(/[٩۹]/g, '9');
+}
+
 function normalizePhone(raw: string): string {
-  let digits = (raw || '').replace(/\D/g, '');
-  if (digits.startsWith('967')) digits = digits.slice(3);
+  if (!raw) return '';
+  const converted = convertArabicNumerals(raw);
+  let digits = converted.replace(/\D/g, '');
+  if (digits.startsWith('00967')) digits = digits.slice(5);
+  else if (digits.startsWith('967')) digits = digits.slice(3);
   if (digits.startsWith('0')) digits = digits.slice(1);
   return digits;
 }
@@ -157,9 +175,10 @@ export const localAuthStore = {
   async register(params: {
     fullName: string;
     phone: string;
+    email?: string;
     password: string;
     confirmPassword: string;
-    isAcademyMember: boolean;
+    isAcademyMember?: boolean;
   }): Promise<{ user: StudentUser; token: string; message: string }> {
     this.init();
     if (!params.fullName || !params.phone || !params.password) {
@@ -170,31 +189,25 @@ export const localAuthStore = {
     }
 
     const cleanPhone = normalizePhone(params.phone);
+    if (cleanPhone.length < 7) {
+      throw new Error('رقم الهاتف قصير جداً، يُرجى إدخال رقم هاتف صحيح');
+    }
+
     const students = this.getStudents();
     if (students.some(s => normalizePhone(s.phone) === cleanPhone)) {
-      throw new Error('رقم الهاتف مسجل بالفعل مسبقاً');
+      throw new Error('رقم الهاتف مسجل بالفعل مسبقاً، يُرجى تسجيل الدخول');
     }
 
-    // Check preapproved
-    const pre = this.getPreapproved();
-    const isPreapproved = pre.some(p => normalizePhone(p.phone) === cleanPhone);
-
-    let status: SubscriptionStatus = 'pending_subscription';
-    let msg = 'تم إنشاء الحساب بنجاح. يُرجى الاشتراك عبر إدارة الأكاديمية لتفعيل الحساب.';
-
-    if (isPreapproved) {
-      status = 'active';
-      msg = 'تم التحقق من عضويتك في الأكاديمية بنجاح! حسابك مفعّل الآن.';
-    } else if (params.isAcademyMember) {
-      status = 'pending_verification';
-      msg = 'تم تسجيل طلبك. سيقوم المالك بالتحقق من عضويتك في الأكاديمية والموافقة عليه قريباً.';
-    }
+    // Default status is ALWAYS pending owner approval
+    const status: SubscriptionStatus = 'pending_verification';
+    const msg = 'تم إنشاء حسابك بنجاح، لكن حسابك غير مفعّل. أرسل طلب الاشتراك إلى المالك وانتظر الموافقة لتتمكن من استخدام المختبر';
 
     const newUser: StudentUser = {
       id: 'std_' + Math.random().toString(36).substring(2, 9),
       phone: cleanPhone,
       fullName: params.fullName.trim(),
-      isAcademyMember: !!params.isAcademyMember,
+      email: params.email?.trim() || undefined,
+      isAcademyMember: Boolean(params.isAcademyMember),
       subscriptionStatus: status,
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),

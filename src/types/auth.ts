@@ -15,6 +15,7 @@ export interface StudentUser {
   id: string;
   phone: string;
   fullName: string;
+  email?: string;
   isAcademyMember: boolean;
   subscriptionStatus: SubscriptionStatus;
   subscriptionExpiresAt?: string | null;

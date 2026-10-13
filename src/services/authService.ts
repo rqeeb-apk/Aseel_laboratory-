@@ -93,9 +93,10 @@ export const authService = {
   async register(params: {
     fullName: string;
     phone: string;
+    email?: string;
     password: string;
     confirmPassword: string;
-    isAcademyMember: boolean;
+    isAcademyMember?: boolean;
   }): Promise<{ user: StudentUser; token: string; message: string }> {
     const res = await this.request('/api/auth/register', {
       method: 'POST',

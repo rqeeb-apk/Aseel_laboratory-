@@ -703,8 +703,8 @@ export default function App() {
     );
   }
 
-  // Logged in student but subscription is pending or suspended -> Block lab access unless exploring in demo mode
-  if (currentUser && currentUser.subscriptionStatus !== 'active' && !isDemoPreviewActive) {
+  // Logged in student but subscription is pending or suspended -> Strict protection, block lab access completely until owner approval
+  if (currentUser && currentUser.subscriptionStatus !== 'active') {
     return (
       <>
         <PendingStatusView
@@ -712,7 +712,6 @@ export default function App() {
           onRefreshStatus={handleRefreshUserStatus}
           onLogout={handleLogout}
           onOpenChangePassword={() => setIsChangePasswordOpen(true)}
-          onEnterDemoMode={() => setIsDemoPreviewActive(true)}
         />
         <ChangePasswordModal
           isOpen={isChangePasswordOpen}

@@ -39,6 +39,10 @@ db.exec(`
     last_login_at TEXT
   );
 
+  try {
+    db.exec('ALTER TABLE users ADD COLUMN email TEXT;');
+  } catch {}
+
   CREATE TABLE IF NOT EXISTS preapproved_members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     phone TEXT UNIQUE NOT NULL,
@@ -90,10 +94,30 @@ function verifyPassword(password: string, salt: string, storedHash: string): boo
   }
 }
 
+function convertArabicNumerals(str: string): string {
+  if (!str) return '';
+  return String(str)
+    .replace(/[٠۰]/g, '0')
+    .replace(/[١۱]/g, '1')
+    .replace(/[٢۲]/g, '2')
+    .replace(/[٣۳]/g, '3')
+    .replace(/[٤۴]/g, '4')
+    .replace(/[٥۵]/g, '5')
+    .replace(/[٦۶]/g, '6')
+    .replace(/[٧۷]/g, '7')
+    .replace(/[٨۸]/g, '8')
+    .replace(/[٩۹]/g, '9');
+}
+
 function normalizePhone(rawPhone: string): string {
-  // Strip non-digits and leading +967 or 00967 or 0
-  let digits = rawPhone.replace(/\D/g, '');
-  if (digits.startsWith('967')) {
+  if (!rawPhone) return '';
+  // Convert Arabic/Eastern numerals first
+  const converted = convertArabicNumerals(rawPhone);
+  // Strip all non-digits
+  let digits = converted.replace(/\D/g, '');
+  if (digits.startsWith('00967')) {
+    digits = digits.slice(5);
+  } else if (digits.startsWith('967')) {
     digits = digits.slice(3);
   }
   if (digits.startsWith('0')) {
@@ -189,10 +213,10 @@ function requireOwnerAuth(req: express.Request, res: express.Response, next: exp
 // Register new student
 app.post('/api/auth/register', (req, res) => {
   try {
-    const { fullName, phone, password, confirmPassword, isAcademyMember } = req.body;
+    const { fullName, phone, email, password, confirmPassword, isAcademyMember } = req.body;
 
-    if (!fullName || typeof fullName !== 'string' || fullName.trim().length < 3) {
-      res.status(400).json({ error: 'يُرجى إدخال الاسم الكامل (ثلاثي على الأقل)' });
+    if (!fullName || typeof fullName !== 'string' || fullName.trim().length < 2) {
+      res.status(400).json({ error: 'يُرجى إدخال الاسم الكامل للطالب أو المهندس' });
       return;
     }
 
@@ -202,8 +226,8 @@ app.post('/api/auth/register', (req, res) => {
     }
 
     const cleanPhone = normalizePhone(phone);
-    if (cleanPhone.length < 8) {
-      res.status(400).json({ error: 'رقم الهاتف قصير جداً، يُرجى إدخال رقم صحيح' });
+    if (cleanPhone.length < 7) {
+      res.status(400).json({ error: 'رقم الهاتف قصير جداً، يُرجى إدخال رقم صحيح (مثال: 785502919)' });
       return;
     }
 
@@ -224,29 +248,10 @@ app.post('/api/auth/register', (req, res) => {
       return;
     }
 
-    // Check if phone is pre-approved in Academy records
-    const preapproved = db.prepare('SELECT * FROM preapproved_members WHERE phone = ?').get(cleanPhone) as any;
-
-    let initialStatus: 'active' | 'pending_verification' | 'pending_subscription' = 'pending_subscription';
-    let expiresAt: string | null = null;
-    let autoApproved = false;
-
-    if (isAcademyMember) {
-      if (preapproved) {
-        // Automatic immediate approval because number is verified in the academy list!
-        initialStatus = 'active';
-        autoApproved = true;
-        const oneYearFromNow = new Date();
-        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-        expiresAt = oneYearFromNow.toISOString();
-      } else {
-        // Academy member without pre-record -> Needs Owner manual verification
-        initialStatus = 'pending_verification';
-      }
-    } else {
-      // Non-member -> Needs subscription via WhatsApp
-      initialStatus = 'pending_subscription';
-    }
+    // Strict Security: All new accounts MUST be pending owner approval. Never auto-activated!
+    const initialStatus: 'pending_verification' = 'pending_verification';
+    const expiresAt: string | null = null;
+    const cleanEmail = email && typeof email === 'string' && email.trim().length > 0 ? email.trim() : null;
 
     const userId = crypto.randomUUID();
     const { salt, hash } = hashPassword(password);
@@ -254,21 +259,22 @@ app.post('/api/auth/register', (req, res) => {
 
     db.prepare(`
       INSERT INTO users (
-        id, phone, full_name, password_salt, password_hash,
+        id, phone, full_name, email, password_salt, password_hash,
         is_academy_member, subscription_status, subscription_expires_at,
         owner_notes, created_at, last_login_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       userId,
       cleanPhone,
       fullName.trim(),
+      cleanEmail,
       salt,
       hash,
       isAcademyMember ? 1 : 0,
       initialStatus,
       expiresAt,
-      autoApproved ? 'تم التفعيل التلقائي لمطابقة رقم الهاتف مع سجل الأكاديمية' : '',
+      'طلب اشتراك جديد بانتظار موافقة المالك وتفعيله',
       now,
       now
     );
@@ -286,16 +292,13 @@ app.post('/api/auth/register', (req, res) => {
         id: userId,
         phone: cleanPhone,
         fullName: fullName.trim(),
+        email: cleanEmail ?? undefined,
         isAcademyMember: Boolean(isAcademyMember),
         subscriptionStatus: initialStatus,
         subscriptionExpiresAt: expiresAt,
-        autoApproved,
+        createdAt: now,
       },
-      message: autoApproved
-        ? 'مرحباً بك! تم التحقق التلقائي من اشتراكك بنجاح وتفعيل حسابك.'
-        : isAcademyMember
-        ? 'تم إنشاء الحساب بنجاح وهو الآن بانتظار التحقق من اشتراكك في الأكاديمية.'
-        : 'تم إنشاء الحساب بنجاح وهو بانتظار إتمام اشتراكك في الأكاديمية.',
+      message: 'تم إنشاء حسابك بنجاح، لكن حسابك غير مفعّل. أرسل طلب الاشتراك إلى المالك وانتظر الموافقة لتتمكن من استخدام المختبر',
     });
   } catch (err: any) {
     console.error('Register error:', err);
@@ -535,7 +538,7 @@ app.get('/api/owner/users', requireOwnerAuth, (req, res) => {
     const search = ((req.query.search as string) || '').trim();
     const status = (req.query.status as string) || '';
 
-    let query = 'SELECT id, phone, full_name, is_academy_member, subscription_status, subscription_expires_at, owner_notes, created_at, last_login_at FROM users WHERE 1=1';
+    let query = 'SELECT id, phone, full_name, email, is_academy_member, subscription_status, subscription_expires_at, owner_notes, created_at, last_login_at FROM users WHERE 1=1';
     const params: any[] = [];
 
     if (search) {
