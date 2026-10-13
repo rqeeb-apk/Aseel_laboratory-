@@ -555,8 +555,30 @@ app.get('/api/owner/users', requireOwnerAuth, (req, res) => {
     query += ' ORDER BY created_at DESC';
 
     const users = db.prepare(query).all(...params);
-    res.json({ users });
+    const mappedUsers = (users as any[]).map(u => ({
+      id: u.id,
+      phone: u.phone,
+      fullName: u.full_name || u.fullName || '',
+      email: u.email || undefined,
+      isAcademyMember: Boolean(u.is_academy_member ?? u.isAcademyMember),
+      subscriptionStatus: u.subscription_status || u.subscriptionStatus || 'pending_verification',
+      subscriptionExpiresAt: u.subscription_expires_at ?? u.subscriptionExpiresAt ?? null,
+      ownerNotes: u.owner_notes ?? u.ownerNotes ?? '',
+      createdAt: u.created_at ?? u.createdAt,
+      lastLoginAt: u.last_login_at ?? u.lastLoginAt,
+      // Snake_case aliases for 100% interoperability
+      full_name: u.full_name || u.fullName || '',
+      subscription_status: u.subscription_status || u.subscriptionStatus || 'pending_verification',
+      subscription_expires_at: u.subscription_expires_at ?? u.subscriptionExpiresAt ?? null,
+      is_academy_member: Boolean(u.is_academy_member ?? u.isAcademyMember),
+      owner_notes: u.owner_notes ?? u.ownerNotes ?? '',
+      created_at: u.created_at ?? u.createdAt,
+      last_login_at: u.last_login_at ?? u.lastLoginAt,
+    }));
+
+    res.json({ users: mappedUsers });
   } catch (err: any) {
+    console.error('Owner users query error:', err);
     res.status(500).json({ error: 'فشل استعلام قائمة الطلاب' });
   }
 });
@@ -579,18 +601,26 @@ app.patch('/api/owner/users/:id/status', requireOwnerAuth, (req, res) => {
       const expDate = new Date();
       expDate.setMonth(expDate.getMonth() + months);
       expiresAt = expDate.toISOString();
+
+      db.prepare(`
+        UPDATE users 
+        SET subscription_status = ?,
+            subscription_expires_at = ?,
+            owner_notes = CASE WHEN ? IS NOT NULL THEN ? ELSE owner_notes END
+        WHERE id = ?
+      `).run(status, expiresAt, ownerNotes ?? null, ownerNotes ?? null, userId);
+    } else {
+      db.prepare(`
+        UPDATE users 
+        SET subscription_status = ?,
+            owner_notes = CASE WHEN ? IS NOT NULL THEN ? ELSE owner_notes END
+        WHERE id = ?
+      `).run(status, ownerNotes ?? null, ownerNotes ?? null, userId);
     }
 
-    db.prepare(`
-      UPDATE users 
-      SET subscription_status = ?,
-          subscription_expires_at = COALESCE(?, subscription_expires_at),
-          owner_notes = COALESCE(?, owner_notes)
-      WHERE id = ?
-    `).run(status, expiresAt, ownerNotes ?? null, userId);
-
-    res.json({ success: true, message: 'تم تحديث حالة الطالب بنجاح' });
+    res.json({ success: true, message: 'تم تحديث حالة الطالب بنجاح', status, expiresAt });
   } catch (err: any) {
+    console.error('Update status error:', err);
     res.status(500).json({ error: 'فشل تحديث بيانات الطالب' });
   }
 });

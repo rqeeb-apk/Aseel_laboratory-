@@ -194,6 +194,18 @@ export const authService = {
     if (res && res.__fallback) {
       return localAuthStore.getOwnerUsers(search, status);
     }
+    if (res && Array.isArray(res.users)) {
+      res.users = res.users.map((u: any) => ({
+        ...u,
+        fullName: u.fullName || u.full_name || '',
+        subscriptionStatus: u.subscriptionStatus || u.subscription_status || 'pending_verification',
+        subscriptionExpiresAt: u.subscriptionExpiresAt ?? u.subscription_expires_at ?? null,
+        isAcademyMember: Boolean(u.isAcademyMember ?? u.is_academy_member),
+        ownerNotes: u.ownerNotes ?? u.owner_notes ?? '',
+        createdAt: u.createdAt ?? u.created_at,
+        lastLoginAt: u.lastLoginAt ?? u.last_login_at,
+      }));
+    }
     return res;
   },
 

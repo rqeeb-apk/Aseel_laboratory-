@@ -106,6 +106,10 @@ export function OwnerDashboardModal({
   useEffect(() => {
     if (isOpen) {
       loadAllData();
+      const interval = setInterval(() => {
+        loadAllData();
+      }, 5000);
+      return () => clearInterval(interval);
     }
   }, [isOpen, statusFilter]);
 
@@ -219,32 +223,46 @@ export function OwnerDashboardModal({
 
   if (!isOpen) return null;
 
-  const pendingCount = students.filter(
-    s => s.subscriptionStatus === 'pending_verification' || s.subscriptionStatus === 'pending_subscription'
-  ).length;
-  const activeCount = students.filter(s => s.subscriptionStatus === 'active').length;
-  const rejectedCount = students.filter(s => s.subscriptionStatus === 'rejected').length;
-  const suspendedCount = students.filter(s => s.subscriptionStatus === 'suspended').length;
+  const getStudentStatus = (s: StudentUser): string => {
+    return s.subscriptionStatus || (s as any).subscription_status || 'pending_verification';
+  };
+
+  const getStudentName = (s: StudentUser): string => {
+    return s.fullName || (s as any).full_name || 'طالب ميكاترونكس';
+  };
+
+  const pendingCount = students.filter(s => {
+    const st = getStudentStatus(s);
+    return st === 'pending_verification' || st === 'pending_subscription';
+  }).length;
+  const activeCount = students.filter(s => getStudentStatus(s) === 'active').length;
+  const rejectedCount = students.filter(s => getStudentStatus(s) === 'rejected').length;
+  const suspendedCount = students.filter(s => getStudentStatus(s) === 'suspended').length;
 
   const filteredRequests = students.filter(s => {
+    const name = getStudentName(s);
+    const phone = s.phone || '';
+    const email = s.email || '';
+    const st = getStudentStatus(s);
+
     if (requestsSearch.trim()) {
       const q = requestsSearch.trim().toLowerCase();
-      const matchName = (s.fullName || '').toLowerCase().includes(q);
-      const matchPhone = (s.phone || '').includes(q);
-      const matchEmail = (s.email || '').toLowerCase().includes(q);
+      const matchName = name.toLowerCase().includes(q);
+      const matchPhone = phone.includes(q);
+      const matchEmail = email.toLowerCase().includes(q);
       if (!matchName && !matchPhone && !matchEmail) return false;
     }
     if (requestsFilter === 'pending') {
-      return s.subscriptionStatus === 'pending_verification' || s.subscriptionStatus === 'pending_subscription';
+      return st === 'pending_verification' || st === 'pending_subscription';
     }
     if (requestsFilter === 'active') {
-      return s.subscriptionStatus === 'active';
+      return st === 'active';
     }
     if (requestsFilter === 'rejected') {
-      return s.subscriptionStatus === 'rejected';
+      return st === 'rejected';
     }
     if (requestsFilter === 'suspended') {
-      return s.subscriptionStatus === 'suspended';
+      return st === 'suspended';
     }
     return true;
   });
@@ -517,12 +535,12 @@ export function OwnerDashboardModal({
                 </div>
               ) : (
                 filteredRequests.map(student => {
-                  const isPending =
-                    student.subscriptionStatus === 'pending_verification' ||
-                    student.subscriptionStatus === 'pending_subscription';
-                  const isActive = student.subscriptionStatus === 'active';
-                  const isRejected = student.subscriptionStatus === 'rejected';
-                  const isSuspended = student.subscriptionStatus === 'suspended';
+                  const st = getStudentStatus(student);
+                  const isPending = st === 'pending_verification' || st === 'pending_subscription';
+                  const isActive = st === 'active';
+                  const isRejected = st === 'rejected';
+                  const isSuspended = st === 'suspended';
+                  const studentName = getStudentName(student);
 
                   return (
                     <div
@@ -532,7 +550,7 @@ export function OwnerDashboardModal({
                       {/* Left side: Student Data */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-extrabold text-white">{student.fullName}</span>
+                          <span className="text-sm font-extrabold text-white">{studentName}</span>
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                               isActive
@@ -681,65 +699,68 @@ export function OwnerDashboardModal({
 
               {/* Table / Cards */}
               <div className="space-y-2.5">
-                {students.map(st => (
-                  <div
-                    key={st.id}
-                    className="p-3.5 bg-slate-950 border border-slate-800/90 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-sm">{st.fullName}</span>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            st.subscriptionStatus === 'active'
-                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                              : st.subscriptionStatus === 'pending_verification'
-                              ? 'bg-amber-950 text-amber-300 border border-amber-800'
-                              : st.subscriptionStatus === 'suspended'
-                              ? 'bg-red-950 text-red-300 border border-red-800'
-                              : 'bg-blue-950 text-cyan-300 border border-blue-800'
-                          }`}
-                        >
-                          {st.subscriptionStatus === 'active'
-                            ? 'فعال'
-                            : st.subscriptionStatus === 'pending_verification'
-                            ? 'بانتظار التحقق'
-                            : st.subscriptionStatus === 'pending_subscription'
-                            ? 'بانتظار الاشتراك'
-                            : st.subscriptionStatus === 'suspended'
-                            ? 'موقوف'
-                            : 'مرفوض'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-slate-400 mt-1">
-                        <span className="font-mono text-cyan-400">{st.phone}</span>
-                        {st.subscriptionExpiresAt && (
-                          <span className="text-slate-400">
-                            ينتهي في:{' '}
-                            {new Date(st.subscriptionExpiresAt).toLocaleDateString('ar-YE')}
+                {students.map(st => {
+                  const studentStatus = getStudentStatus(st);
+                  const studentName = getStudentName(st);
+                  return (
+                    <div
+                      key={st.id}
+                      className="p-3.5 bg-slate-950 border border-slate-800/90 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-sm">{studentName}</span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              studentStatus === 'active'
+                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                : studentStatus === 'pending_verification'
+                                ? 'bg-amber-950 text-amber-300 border border-amber-800'
+                                : studentStatus === 'suspended'
+                                ? 'bg-red-950 text-red-300 border border-red-800'
+                                : 'bg-blue-950 text-cyan-300 border border-blue-800'
+                            }`}
+                          >
+                            {studentStatus === 'active'
+                              ? 'فعال'
+                              : studentStatus === 'pending_verification'
+                              ? 'بانتظار التحقق'
+                              : studentStatus === 'pending_subscription'
+                              ? 'بانتظار الاشتراك'
+                              : studentStatus === 'suspended'
+                              ? 'موقوف'
+                              : 'مرفوض'}
                           </span>
-                        )}
-                        {st.ownerNotes && (
-                          <span className="text-amber-400/90 truncate max-w-[200px]">
-                            ملاحظة: {st.ownerNotes}
-                          </span>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-4 text-slate-400 mt-1">
+                          <span className="font-mono text-cyan-400">{st.phone}</span>
+                          {(st.subscriptionExpiresAt || (st as any).subscription_expires_at) && (
+                            <span className="text-slate-400">
+                              ينتهي في:{' '}
+                              {new Date((st.subscriptionExpiresAt || (st as any).subscription_expires_at)!).toLocaleDateString('ar-YE')}
+                            </span>
+                          )}
+                          {(st.ownerNotes || (st as any).owner_notes) && (
+                            <span className="text-amber-400/90 truncate max-w-[200px]">
+                              ملاحظة: {st.ownerNotes || (st as any).owner_notes}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        onClick={() => handleUpdateStatus(st.id, 'active', 12)}
-                        className={`px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 ${
-                          st.subscriptionStatus === 'active'
-                            ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40'
-                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
-                        }`}
-                        title="تفعيل الحساب للسماح باستخدام المختبر"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        <span>{st.subscriptionStatus === 'active' ? 'تمديد سنة' : 'تفعيل الحساب'}</span>
-                      </button>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <button
+                          onClick={() => handleUpdateStatus(st.id, 'active', 12)}
+                          className={`px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 ${
+                            studentStatus === 'active'
+                              ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40'
+                              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                          }`}
+                          title="تفعيل الحساب للسماح باستخدام المختبر"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>{studentStatus === 'active' ? 'تمديد سنة' : 'تفعيل الحساب'}</span>
+                        </button>
 
                       <button
                         onClick={() => handleUpdateStatus(st.id, 'rejected')}
@@ -771,7 +792,7 @@ export function OwnerDashboardModal({
                       </button>
 
                       <button
-                        onClick={() => handleDeleteStudent(st.id, st.fullName)}
+                        onClick={() => handleDeleteStudent(st.id, studentName)}
                         className="px-2 py-1.5 bg-red-950/60 hover:bg-red-900/80 text-red-400 border border-red-800/60 rounded-lg"
                         title="حذف الحساب نهائياً"
                       >
@@ -779,9 +800,10 @@ export function OwnerDashboardModal({
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
           )}
 
           {/* TAB 3: PRE-APPROVED ACADEMY MEMBERS */}

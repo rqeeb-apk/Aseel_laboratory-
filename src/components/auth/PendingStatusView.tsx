@@ -37,6 +37,15 @@ export function PendingStatusView({
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
 
+  // Auto-poll every 4 seconds so that when the owner activates the student,
+  // the student's phone immediately enters the lab automatically!
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      onRefreshStatus().catch(() => {});
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [onRefreshStatus]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     setRefreshMsg(null);
